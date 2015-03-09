@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Rotoscope</string>
+    <string name="action_settings">Settings</string>
+    <string name="get_film_by_cam">Get new film with your camera</string>
+    <string name="get_film_by_file">Open film from existing file</string>
+
+</resources>
