@@ -24,7 +24,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/get_film_by_file"
-                android:id="@+id/get_film_by_file" android:layout_gravity="center_horizontal"/>
+                android:id="@+id/get_film_by_file" android:layout_gravity="center_horizontal"
+                android:onClick="getFilmByFileSystem"/>
     </LinearLayout>
 
 </RelativeLayout>

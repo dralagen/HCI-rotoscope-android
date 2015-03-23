@@ -20,6 +20,7 @@ import java.util.Date;
 public class MainActivity extends Activity {
 
   private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
+  private static final int FILE_SELECT_CODE = 100;
   private Uri fileUri;
 
   public static final int MEDIA_TYPE_IMAGE = 1;
@@ -103,6 +104,22 @@ public class MainActivity extends Activity {
 
   }
 
+  public void getFilmByFileSystem(View view) {
+    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+    intent.setType("video/*");
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    try {
+      startActivityForResult(
+          Intent.createChooser(intent, "Select a Movie"),
+          FILE_SELECT_CODE);
+    } catch (android.content.ActivityNotFoundException ex) {
+      // Potentially direct the user to the Market with a Dialog
+      Toast.makeText(this, "Please install a File Manager.",
+          Toast.LENGTH_SHORT).show();
+    }
+  }
+
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE) {
@@ -110,6 +127,16 @@ public class MainActivity extends Activity {
         // Video captured and saved to fileUri specified in the Intent
         Toast.makeText(this, "Video saved to:\n" +
             fileUri, Toast.LENGTH_LONG).show();
+
+        getActionBar().hide();
+      }
+    } else if (requestCode == FILE_SELECT_CODE) {
+      if (resultCode == RESULT_OK) {
+        Toast.makeText(this, "Video open is : \n" +
+            data.getDataString(), Toast.LENGTH_LONG).show();
+
+        getActionBar().hide();
+
       }
     }
   }
