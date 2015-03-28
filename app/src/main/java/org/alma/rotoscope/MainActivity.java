@@ -122,22 +122,23 @@ public class MainActivity extends Activity {
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    String resourcePath = null;
     if (requestCode == CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE) {
       if (resultCode == RESULT_OK) {
-        // Video captured and saved to fileUri specified in the Intent
-        Toast.makeText(this, "Video saved to:\n" +
-            fileUri, Toast.LENGTH_LONG).show();
-
-        getActionBar().hide();
+        resourcePath = fileUri.getPath();
       }
     } else if (requestCode == FILE_SELECT_CODE) {
       if (resultCode == RESULT_OK) {
-        Toast.makeText(this, "Video open is : \n" +
-            data.getDataString(), Toast.LENGTH_LONG).show();
-
-        getActionBar().hide();
-
+        resourcePath = data.getDataString();
       }
+    }
+
+    if (resourcePath != null) {
+      Toast.makeText(this, "path : "+resourcePath, Toast.LENGTH_LONG).show();
+
+      Intent drawingArea = new Intent(this, DrawingActivity.class);
+      drawingArea.putExtra("resourcePath", resourcePath);
+      startActivity(drawingArea);
     }
   }
 }
