@@ -134,8 +134,6 @@ public class MainActivity extends Activity {
     }
 
     if (resourcePath != null) {
-      Toast.makeText(this, "path : "+resourcePath, Toast.LENGTH_LONG).show();
-
       Intent drawingArea = new Intent(this, DrawingActivity.class);
       drawingArea.putExtra("resourcePath", resourcePath);
       startActivity(drawingArea);

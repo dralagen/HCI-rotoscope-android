@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools" android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent" tools:context=".DrawingActivity">
+
+  <view android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        class="org.alma.rotoscope.DrawingArea" android:id="@+id/drawingAreaView"
+        android:background="@android:color/background_dark"/>
+</LinearLayout>
