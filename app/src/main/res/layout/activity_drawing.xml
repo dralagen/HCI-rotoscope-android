@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools" android:orientation="horizontal"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
-              android:layout_height="match_parent" tools:context=".DrawingActivity">
+              android:layout_height="match_parent" tools:context=".DrawingActivity" style="@style/DrawingTheme">
 
-  <view android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        class="org.alma.rotoscope.DrawingArea" android:id="@+id/drawingAreaView"
-        android:background="@android:color/background_dark"/>
-</LinearLayout>
+  <view class="org.alma.rotoscope.DrawingArea" android:layout_width="fill_parent" android:layout_height="fill_parent"
+        android:id="@+id/drawingAreaView" android:background="@android:color/background_dark"/>
+  <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|bottom" android:layout_alignParentBottom="true"
+                android:orientation="horizontal">
+    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&lt;&lt;"
+            android:id="@+id/PreviousButton" android:layout_gravity="left" android:layout_alignParentLeft="true"
+            android:layout_marginLeft="0dp" android:layout_alignParentTop="true" android:layout_marginTop="0dp"
+            android:onClick="previousPicture"/>
+    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=">>"
+            android:id="@+id/NextButton" android:layout_gravity="right" android:layout_alignParentLeft="false"
+            android:layout_alignParentTop="true" android:layout_marginTop="0dp" android:layout_marginRight="0dp"
+            android:layout_alignParentRight="true" android:onClick="nextPicture"/>
+  </RelativeLayout>
+</RelativeLayout>

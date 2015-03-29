@@ -2,6 +2,7 @@ package org.alma.rotoscope;
 
 import android.content.Context;
 import android.graphics.*;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -49,6 +50,17 @@ public class DrawingArea extends View {
     mPaint.setStrokeCap(Paint.Cap.ROUND);
     mPaint.setStrokeWidth(12);
 
+  }
+
+  @Override
+  public void setBackground(Drawable background) {
+    super.setBackground(background);
+
+    if (getWidth() > 0 && getHeight() > 0) {
+      mBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+      mCanvas = new Canvas(mBitmap);
+
+    }
   }
 
   @Override
