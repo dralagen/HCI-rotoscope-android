@@ -30,7 +30,9 @@
         <activity
             android:name=".DrawingActivity"
             android:label="@string/title_activity_drawing"
-            android:theme="@style/DrawingTheme">
+            android:theme="@style/DrawingTheme"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
     </application>
 
