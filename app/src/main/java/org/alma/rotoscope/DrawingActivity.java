@@ -30,6 +30,7 @@ public class DrawingActivity extends Activity {
   private MediaMetadataRetriever metadata;
   private int currentPicture;
   private int duration;
+  private int nbImageInput;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +53,13 @@ public class DrawingActivity extends Activity {
       int height = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
       int rotation = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
       duration = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+      nbImageInput = (int)((float) duration / 1000 * INPUT_FPS);
 
       Log.d(TAG, "width=" + width);
       Log.d(TAG, "height=" + height);
       Log.d(TAG, "rotation=" + rotation);
       Log.d(TAG, "duration=" + duration);
-      Log.d(TAG, "maxImage=" + (int)((float) duration / 1000) * ((float) OUTPUT_FPS / INPUT_FPS));
+      Log.d(TAG, "nbImageInput=" + nbImageInput);
 
 
       if ((width < height && (rotation == 0 || rotation == 180))
@@ -82,7 +84,7 @@ public class DrawingActivity extends Activity {
 
     View drawingArea = findViewById(R.id.drawingAreaView);
 
-    long time = currentPicture * 100000 * INPUT_FPS / OUTPUT_FPS;
+    long time = (long) (currentPicture * 100000 * ((float)OUTPUT_FPS / INPUT_FPS));
 
     Log.d(TAG, "show picture " + currentPicture);
     Log.d(TAG, "show Frame at " + time);
@@ -93,7 +95,7 @@ public class DrawingActivity extends Activity {
   }
 
   public void nextPicture(View view) {
-    if (currentPicture >= duration * OUTPUT_FPS / INPUT_FPS) {
+    if ((int)((currentPicture+1) * ((float)OUTPUT_FPS/INPUT_FPS)) > nbImageInput ) {
       return;
     }
 
