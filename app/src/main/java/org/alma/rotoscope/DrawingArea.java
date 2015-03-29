@@ -2,8 +2,10 @@ package org.alma.rotoscope;
 
 import android.content.Context;
 import android.graphics.*;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -13,6 +15,8 @@ import android.view.View;
  * @author dralagen
  */
 public class DrawingArea extends View {
+
+  private static final String TAG = "DrawingArea";
 
   private Bitmap mBitmap;
   private Canvas mCanvas;
@@ -36,7 +40,7 @@ public class DrawingArea extends View {
     setupDrawingArea(context);
   }
 
-  private void setupDrawingArea(Context context) {
+  public void setupDrawingArea(Context context) {
     this.context = context;
     mPath = new Path();
     mBitmapPaint = new Paint(Paint.DITHER_FLAG);
@@ -52,14 +56,17 @@ public class DrawingArea extends View {
 
   }
 
+  public void setLayer(Bitmap bitmap, BitmapDrawable bitmapDrawable) {
+    mBitmap = bitmap;
+    setBackground(bitmapDrawable);
+  }
+
   @Override
   public void setBackground(Drawable background) {
     super.setBackground(background);
 
-    if (getWidth() > 0 && getHeight() > 0) {
-      mBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+    if (mBitmap != null) {
       mCanvas = new Canvas(mBitmap);
-
     }
   }
 
@@ -67,8 +74,12 @@ public class DrawingArea extends View {
   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
 
-    mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-    mCanvas = new Canvas(mBitmap);
+    Log.d(TAG, "Width  : " + w);
+    Log.d(TAG, "Height : " + h);
+
+    if (mBitmap != null) {
+      mCanvas = new Canvas(mBitmap);
+    }
 
   }
   @Override

@@ -3,11 +3,13 @@ package org.alma.rotoscope;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,18 +21,20 @@ public class DrawingActivity extends Activity {
   /**
    * fps of my video
    */
-  private static final int OUTPUT_FPS = 6;
+  private static final float OUTPUT_FPS = 12.0f;
 
   /**
    * fps of original video
    */
-  private static final int INPUT_FPS = 24;
+  private static final float INPUT_FPS = 24.0f;
 
-  private String resourcePath;
+  private static final float RATE_FPS = INPUT_FPS / OUTPUT_FPS;
+
   private MediaMetadataRetriever metadata;
   private int currentPicture;
-  private int duration;
   private int nbImageInput;
+
+  private SparseArray<Bitmap> layers;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -38,28 +42,28 @@ public class DrawingActivity extends Activity {
 
     { // load metadata
       Bundle bundle = getIntent().getExtras();
-      resourcePath = bundle.getString("resourcePath");
+      String resourcePath = bundle.getString("resourcePath");
 
       Log.d(TAG, "resource=" + resourcePath);
 
       metadata = new MediaMetadataRetriever();
       metadata.setDataSource(this, Uri.parse(resourcePath));
 
-      setContentView(R.layout.activity_drawing);
+      nbImageInput = (int)(Float.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)) / 1000 * INPUT_FPS);
+      Log.d(TAG, "nbImageInput=" + nbImageInput);
+      Log.d(TAG, "RATE_FPS=" + RATE_FPS);
     }
 
+    int width = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+    int height = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+
     { // find screen orientation
-      int width = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-      int height = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+
       int rotation = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
-      duration = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-      nbImageInput = (int)((float) duration / 1000 * INPUT_FPS);
 
       Log.d(TAG, "width=" + width);
       Log.d(TAG, "height=" + height);
       Log.d(TAG, "rotation=" + rotation);
-      Log.d(TAG, "duration=" + duration);
-      Log.d(TAG, "nbImageInput=" + nbImageInput);
 
 
       if ((width < height && (rotation == 0 || rotation == 180))
@@ -74,33 +78,46 @@ public class DrawingActivity extends Activity {
 
     }
 
-    { // set background
+    { // set view
+      int nbImageOutput = (int) (nbImageInput / RATE_FPS);
+      Log.d(TAG, "nbImageOutput=" + nbImageOutput);
+
+      layers = new SparseArray<>(nbImageOutput);
+      Point size = new Point();
+      getWindowManager().getDefaultDisplay().getSize(size);
+      Log.d(TAG, "size : " + size.x + "x" + size.y);
+      for (int i = 0; i < nbImageOutput; ++i) {
+        layers.put(i, Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
+      }
+
+      setContentView(R.layout.activity_drawing);
+
       currentPicture = 0;
-      setBackground();
+      setLayer();
     }
   }
 
-  private void setBackground() {
+  private void setLayer() {
 
-    View drawingArea = findViewById(R.id.drawingAreaView);
+    DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
 
-    long time = (long) (currentPicture * 100000 * ((float)OUTPUT_FPS / INPUT_FPS));
+    long time = (long) (RATE_FPS * currentPicture * 1000000 / OUTPUT_FPS);
 
     Log.d(TAG, "show picture " + currentPicture);
     Log.d(TAG, "show Frame at " + time);
 
     //metadata.setDataSource(this, Uri.parse(resourcePath));
     Bitmap background = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
-    drawingArea.setBackground(new BitmapDrawable(getResources(), background));
+    drawingArea.setLayer(layers.get(currentPicture), new BitmapDrawable(getResources(), background));
   }
 
   public void nextPicture(View view) {
-    if ((int)((currentPicture+1) * ((float)OUTPUT_FPS/INPUT_FPS)) > nbImageInput ) {
+    if ((currentPicture+1) > nbImageInput * RATE_FPS ) {
       return;
     }
 
     currentPicture++;
-    setBackground();
+    setLayer();
   }
 
   public void previousPicture(View view) {
@@ -109,7 +126,7 @@ public class DrawingActivity extends Activity {
     }
 
     currentPicture--;
-    setBackground();
+    setLayer();
   }
 
   @Override
