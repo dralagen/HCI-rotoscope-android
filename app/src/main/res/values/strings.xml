@@ -10,6 +10,7 @@
     <string name="title_activity_drawing">Drawing</string>
     <string name="settings_inputVideoFrameRate">Input Video FrameRate</string>
     <string name="settings_outputVideoFrameRate">Output Video FrameRate</string>
+    <string name="button_previousButton">Previous Button</string>
 
 
 </resources>

@@ -1,6 +1,7 @@
 package org.alma.rotoscope;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
@@ -15,6 +16,7 @@ import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import org.alma.rotoscope.colorpicker.ColorPickerDialog;
 
 
 public class DrawingActivity extends Activity {
@@ -32,6 +34,8 @@ public class DrawingActivity extends Activity {
   private int currentPicture;
 
   private SparseArray<Bitmap> layers;
+
+  private ColorPickerDialog colorPicker;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -96,9 +100,23 @@ public class DrawingActivity extends Activity {
       }
 
       setContentView(R.layout.activity_drawing);
-
+      final DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
       currentPicture = 0;
       setLayer();
+
+      colorPicker = new ColorPickerDialog(this, drawingArea.getColor());
+      colorPicker.setAlphaSliderVisible(true);
+      colorPicker.setButton(DialogInterface.BUTTON_POSITIVE, "Ok", new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick (DialogInterface dialog, int which) {
+          drawingArea.setColor(colorPicker.getColor());
+        }
+      });
+      colorPicker.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick (DialogInterface dialog, int which) {
+        }
+      });
     }
   }
 
@@ -136,6 +154,19 @@ public class DrawingActivity extends Activity {
     currentPicture--;
     setLayer();
   }
+
+  public void erasePicture(View view) {
+    Point size = new Point();
+    getWindowManager().getDefaultDisplay().getSize(size);
+    layers.put(currentPicture, Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
+    setLayer();
+  }
+
+  public void pickColor(View view) {
+    colorPicker.show();
+  }
+
+
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {

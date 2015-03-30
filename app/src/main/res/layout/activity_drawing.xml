@@ -9,13 +9,38 @@
   <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|bottom" android:layout_alignParentBottom="true"
                 android:orientation="horizontal">
-    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&lt;&lt;"
+    <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:id="@+id/PreviousButton" android:layout_gravity="left" android:layout_alignParentLeft="true"
             android:layout_marginLeft="0dp" android:layout_alignParentTop="true" android:layout_marginTop="0dp"
-            android:onClick="previousPicture"/>
-    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=">>"
+            android:onClick="previousPicture" android:src="@android:drawable/ic_media_previous"
+            android:contentDescription="@string/button_previousButton"/>
+    <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:id="@+id/NextButton" android:layout_gravity="right" android:layout_alignParentLeft="false"
             android:layout_alignParentTop="true" android:layout_marginTop="0dp" android:layout_marginRight="0dp"
-            android:layout_alignParentRight="true" android:onClick="nextPicture"/>
+            android:layout_alignParentRight="true" android:onClick="nextPicture"
+            android:src="@android:drawable/ic_media_next"/>
   </RelativeLayout>
+  <LinearLayout
+      android:orientation="vertical"
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent" android:layout_alignParentRight="true" android:id="@+id/MenuLayout"
+      android:layout_marginRight="0dp">
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/saveButton"
+        android:src="@android:drawable/ic_menu_save"/>
+    <ImageButton
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/shareButton" android:src="@android:drawable/ic_menu_share"/>
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/colorPickerButton" android:src="@android:drawable/ic_menu_edit" android:onClick="pickColor"/>
+    <ImageButton
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/eraseButton" android:src="@android:drawable/ic_menu_delete" android:onClick="erasePicture"/>
+  </LinearLayout>
 </RelativeLayout>

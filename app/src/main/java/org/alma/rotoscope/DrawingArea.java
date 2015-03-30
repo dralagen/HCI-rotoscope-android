@@ -86,10 +86,20 @@ public class DrawingArea extends View {
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
 
-    canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
+    if (mBitmap != null ) {
+      canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+    }
 
     canvas.drawPath( mPath,  mPaint);
 
+  }
+
+  public int getColor() {
+    return mPaint.getColor();
+  }
+
+  public void setColor(int color) {
+    mPaint.setColor(color);
   }
 
   private float mX, mY;
