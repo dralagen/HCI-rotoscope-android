@@ -23,9 +23,6 @@ public class MainActivity extends Activity {
   private static final int FILE_SELECT_CODE = 100;
   private Uri fileUri;
 
-  public static final int MEDIA_TYPE_IMAGE = 1;
-  public static final int MEDIA_TYPE_VIDEO = 2;
-
   /** Create a file Uri for saving an image or video */
   private static Uri getOutputMediaFileUri(){
     File f = getOutputMediaFile();
@@ -41,7 +38,7 @@ public class MainActivity extends Activity {
     // using Environment.getExternalStorageState() before doing this.
 
     File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_PICTURES), String.valueOf(R.string.app_name));
+        Environment.DIRECTORY_DCIM), String.valueOf(R.string.app_name));
     // This location works best if you want the created images to be shared
     // between applications and persist after your app has been uninstalled.
 
