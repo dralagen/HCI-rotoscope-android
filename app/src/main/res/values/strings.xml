@@ -6,7 +6,10 @@
     <string name="get_film_by_cam">Get new film with your camera</string>
     <string name="get_film_by_file">Open film from existing file</string>
     <string name="title_activity_rotoscope">@string/app_name</string>
-    <string name="title_activity_drawing">DrawingActivity</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_drawing">Drawing</string>
+    <string name="settings_inputVideoFrameRate">Input Video FrameRate</string>
+    <string name="settings_outputVideoFrameRate">Output Video FrameRate</string>
 
 
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <EditTextPreference
+      android:key="inputVideoFrameRate"
+      android:title="@string/settings_inputVideoFrameRate"
+      android:numeric="decimal"
+      android:defaultValue="24.0"/>
+  <EditTextPreference
+    android:key="outputVideoFrameRate"
+    android:title="@string/settings_outputVideoFrameRate"
+    android:numeric="decimal"
+    android:defaultValue="6.0"/>
+
+</PreferenceScreen>

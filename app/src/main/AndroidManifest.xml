@@ -33,6 +33,10 @@
             android:label="@string/title_activity_drawing"
             android:theme="@style/DrawingTheme">
         </activity>
+        <activity android:name=".SettingsActivity"
+                  android:label="@string/title_activity_settings"
+                  android:theme="@style/MainTheme">
+        </activity>
     </application>
 
 </manifest>

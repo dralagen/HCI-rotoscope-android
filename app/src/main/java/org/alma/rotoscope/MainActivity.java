@@ -63,6 +63,7 @@ public class MainActivity extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
     setContentView(R.layout.activity_main);
   }
 
@@ -83,6 +84,7 @@ public class MainActivity extends Activity {
 
     switch (id) {
       case R.id.action_settings :
+        startActivity(new Intent(this, SettingsActivity.class));
         return true;
 
     }

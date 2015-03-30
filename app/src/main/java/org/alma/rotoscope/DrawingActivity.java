@@ -1,6 +1,7 @@
 package org.alma.rotoscope;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -8,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
@@ -18,21 +20,16 @@ import android.view.View;
 public class DrawingActivity extends Activity {
 
   private static final String TAG = "DrawingActivity";
-  /**
-   * fps of my video
-   */
-  private static final float OUTPUT_FPS = 4.0f;
 
   /**
    * fps of original video
    */
-  private static final float INPUT_FPS = 24.0f;
+  private float inputFps;
 
-  private static final float RATE_FPS = INPUT_FPS / OUTPUT_FPS;
+  private float rateFps;
 
   private MediaMetadataRetriever metadata;
   private int currentPicture;
-  private int nbImageInput;
 
   private SparseArray<Bitmap> layers;
 
@@ -40,7 +37,15 @@ public class DrawingActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+    int nbImageInput;
     { // load metadata
+
+      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+      float outputFps = Float.parseFloat(preferences.getString("outputVideoFrameRate", "6.0f"));
+      inputFps = Float.parseFloat(preferences.getString("inputVideoFrameRate", "24.0f"));
+      rateFps = inputFps / outputFps;
+
       Bundle bundle = getIntent().getExtras();
       String resourcePath = bundle.getString("resourcePath");
 
@@ -49,9 +54,9 @@ public class DrawingActivity extends Activity {
       metadata = new MediaMetadataRetriever();
       metadata.setDataSource(this, Uri.parse(resourcePath));
 
-      nbImageInput = (int)(Float.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)) / 1000 * INPUT_FPS);
+      nbImageInput = (int)(Float.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)) / 1000 * inputFps);
       Log.d(TAG, "nbImageInput=" + nbImageInput);
-      Log.d(TAG, "RATE_FPS=" + RATE_FPS);
+      Log.d(TAG, "rateFps=" + rateFps);
     }
 
     int width = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
@@ -79,7 +84,7 @@ public class DrawingActivity extends Activity {
     }
 
     { // set view
-      int nbImageOutput = (int) (nbImageInput / RATE_FPS);
+      int nbImageOutput = (int) (nbImageInput / rateFps);
       Log.d(TAG, "nbImageOutput=" + nbImageOutput);
 
       layers = new SparseArray<>(nbImageOutput);
@@ -101,7 +106,7 @@ public class DrawingActivity extends Activity {
 
     DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
 
-    long time = (long) (RATE_FPS * (currentPicture * 1000000 / INPUT_FPS));
+    long time = (long) (rateFps * (currentPicture * 1000000 / inputFps));
 
     Log.d(TAG, "show picture " + currentPicture);
     Log.d(TAG, "show Frame at " + time);
