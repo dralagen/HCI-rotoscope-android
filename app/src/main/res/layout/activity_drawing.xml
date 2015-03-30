@@ -7,8 +7,9 @@
   <view class="org.alma.rotoscope.DrawingArea" android:layout_width="fill_parent" android:layout_height="fill_parent"
         android:id="@+id/drawingAreaView" android:background="@android:color/background_dark"/>
   <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|bottom" android:layout_alignParentBottom="true"
-                android:orientation="horizontal" android:id="@+id/navigationLayout">
+                  android:layout_gravity="center_vertical|bottom" android:layout_alignParentBottom="true"
+                  android:orientation="horizontal" android:id="@+id/navigationLayout"
+                  android:animateLayoutChanges="true">
     <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:id="@+id/PreviousButton" android:layout_alignParentTop="true" android:layout_marginTop="0dp"
             android:onClick="previousPicture" android:src="@android:drawable/ic_media_previous"
@@ -23,7 +24,7 @@
   </RelativeLayout>
   <LinearLayout
       android:orientation="vertical"
-      android:layout_width="wrap_content"
+      android:layout_width="wrap_content" android:animateLayoutChanges="true"
       android:layout_height="fill_parent" android:id="@+id/MenuLayout" android:layout_alignParentLeft="false"
       android:layout_alignParentTop="true" android:layout_alignParentRight="true">
     <ImageButton

@@ -1,5 +1,7 @@
 package org.alma.rotoscope;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -190,6 +192,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
 
         handler.removeCallbacks(runHideMenu);
         handler.post(runHideMenu);
+        runHideMenu = null;
 
         break;
 
@@ -197,21 +200,18 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         if (shortPress) {
 
           final View menu = findViewById(R.id.MenuLayout);
-          menu.setVisibility(View.VISIBLE);
-          menu.invalidate();
+          fade(menu, true);
+
           final View nav = findViewById(R.id.navigationLayout);
-          nav.setVisibility(View.VISIBLE);
-          nav.invalidate();
+          fade(nav, true);
 
           Log.d(TAG, "Menu visible");
 
           runHideMenu = new Runnable() {
             @Override
             public void run() {
-              menu.setVisibility(View.INVISIBLE);
-              menu.invalidate();
-              nav.setVisibility(View.INVISIBLE);
-              nav.invalidate();
+              fade(menu, false);
+              fade(nav, false);
               Log.d(TAG, "Menu invisible");
             }
           };
@@ -219,5 +219,29 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         }
     }
     return false;
+  }
+
+  private void fade(final View v, boolean fadeIn) {
+
+    if (fadeIn && v.getVisibility() != View.VISIBLE) {
+      v.setAlpha(0f);
+      v.setVisibility(View.VISIBLE);
+
+      v.animate()
+          .alpha(1f)
+          .setDuration(200)
+          .setListener(null);
+
+    } else if (!fadeIn && v.getVisibility() == View.VISIBLE) {
+      v.animate()
+          .alpha(0f)
+          .setDuration(800)
+          .setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+              v.setVisibility(View.GONE);
+            }
+          });
+    }
   }
 }
