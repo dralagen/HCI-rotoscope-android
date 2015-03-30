@@ -21,7 +21,7 @@ public class DrawingActivity extends Activity {
   /**
    * fps of my video
    */
-  private static final float OUTPUT_FPS = 12.0f;
+  private static final float OUTPUT_FPS = 4.0f;
 
   /**
    * fps of original video
@@ -101,7 +101,7 @@ public class DrawingActivity extends Activity {
 
     DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
 
-    long time = (long) (RATE_FPS * currentPicture * 1000000 / OUTPUT_FPS);
+    long time = (long) (RATE_FPS * (currentPicture * 1000000 / INPUT_FPS));
 
     Log.d(TAG, "show picture " + currentPicture);
     Log.d(TAG, "show Frame at " + time);
@@ -112,7 +112,7 @@ public class DrawingActivity extends Activity {
   }
 
   public void nextPicture(View view) {
-    if ((currentPicture+1) > nbImageInput * RATE_FPS ) {
+    if ((currentPicture+1) >= layers.size() ) {
       return;
     }
 
