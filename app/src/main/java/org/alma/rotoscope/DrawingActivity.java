@@ -10,18 +10,21 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import org.alma.rotoscope.colorpicker.ColorPickerDialog;
 
 
-public class DrawingActivity extends Activity {
+
+public class DrawingActivity extends Activity implements View.OnTouchListener {
 
   private static final String TAG = "DrawingActivity";
+
+  private static final Handler handler = new Handler();
 
   /**
    * fps of original video
@@ -36,6 +39,9 @@ public class DrawingActivity extends Activity {
   private SparseArray<Bitmap> layers;
 
   private ColorPickerDialog colorPicker;
+
+  private Runnable runHideMenu;
+  private boolean shortPress;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +107,7 @@ public class DrawingActivity extends Activity {
 
       setContentView(R.layout.activity_drawing);
       final DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
+      drawingArea.setOnTouchListener(this);
       currentPicture = 0;
       setLayer();
 
@@ -114,9 +121,14 @@ public class DrawingActivity extends Activity {
       });
       colorPicker.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
         @Override
-        public void onClick (DialogInterface dialog, int which) {
+        public void onClick(DialogInterface dialog, int which) {
         }
       });
+
+      final View menu = findViewById(R.id.MenuLayout);
+      menu.setVisibility(View.INVISIBLE);
+      final View nav = findViewById(R.id.navigationLayout);
+      nav.setVisibility(View.INVISIBLE);
     }
   }
 
@@ -166,28 +178,46 @@ public class DrawingActivity extends Activity {
     colorPicker.show();
   }
 
-
-
   @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu; this adds items to the action bar if it is present.
-    return true;
-  }
+  public boolean onTouch(View v, MotionEvent event) {
+    switch (event.getAction()) {
+      case  MotionEvent.ACTION_DOWN:
+        shortPress = true;
+        break;
 
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    // Handle action bar item clicks here. The action bar will
-    // automatically handle clicks on the Home/Up button, so long
-    // as you specify a parent activity in AndroidManifest.xml.
-    int id = item.getItemId();
+      case MotionEvent.ACTION_MOVE:
+        shortPress = false;
 
-    //noinspection SimplifiableIfStatement
-    if (id == R.id.action_settings) {
-      return true;
+        handler.removeCallbacks(runHideMenu);
+        handler.post(runHideMenu);
+
+        break;
+
+      case MotionEvent.ACTION_UP:
+        if (shortPress) {
+
+          final View menu = findViewById(R.id.MenuLayout);
+          menu.setVisibility(View.VISIBLE);
+          menu.invalidate();
+          final View nav = findViewById(R.id.navigationLayout);
+          nav.setVisibility(View.VISIBLE);
+          nav.invalidate();
+
+          Log.d(TAG, "Menu visible");
+
+          runHideMenu = new Runnable() {
+            @Override
+            public void run() {
+              menu.setVisibility(View.INVISIBLE);
+              menu.invalidate();
+              nav.setVisibility(View.INVISIBLE);
+              nav.invalidate();
+              Log.d(TAG, "Menu invisible");
+            }
+          };
+          handler.postDelayed(runHideMenu, 5000);
+        }
     }
-
-    return super.onOptionsItemSelected(item);
+    return false;
   }
-
-
 }

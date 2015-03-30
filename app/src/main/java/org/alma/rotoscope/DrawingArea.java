@@ -17,13 +17,15 @@ import android.view.View;
 public class DrawingArea extends View {
 
   private static final String TAG = "DrawingArea";
+  private static final float TOUCH_TOLERANCE = 4;
 
+  Context context;
   private Bitmap mBitmap;
   private Canvas mCanvas;
   private Path mPath;
   private Paint mBitmapPaint;
   private Paint mPaint;
-  Context context;
+  private float mX, mY;
 
   public DrawingArea(Context context) {
     super(context);
@@ -82,6 +84,7 @@ public class DrawingArea extends View {
     }
 
   }
+
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
@@ -101,9 +104,6 @@ public class DrawingArea extends View {
   public void setColor(int color) {
     mPaint.setColor(color);
   }
-
-  private float mX, mY;
-  private static final float TOUCH_TOLERANCE = 4;
 
   private void touch_start(float x, float y) {
     mPath.reset();

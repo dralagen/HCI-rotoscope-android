@@ -10,7 +10,12 @@
     <string name="title_activity_drawing">Drawing</string>
     <string name="settings_inputVideoFrameRate">Input Video FrameRate</string>
     <string name="settings_outputVideoFrameRate">Output Video FrameRate</string>
-    <string name="button_previousButton">Previous Button</string>
+    <string name="button_previousButton">Previous Picture</string>
+    <string name="button_nextButton">Next Picture</string>
+    <string name="button_save">Save</string>
+    <string name="button_share">Share</string>
+    <string name="button_clearLayer">Reset Layer</string>
+    <string name="button_colorPicker">Change color</string>
 
 
 </resources>
