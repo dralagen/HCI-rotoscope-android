@@ -109,6 +109,9 @@ public class DrawingActivity extends Activity {
     //metadata.setDataSource(this, Uri.parse(resourcePath));
     Bitmap background = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
     drawingArea.setLayer(layers.get(currentPicture), new BitmapDrawable(getResources(), background));
+
+    findViewById(R.id.PreviousButton).setEnabled(currentPicture != 0);
+    findViewById(R.id.NextButton).setEnabled(currentPicture < layers.size() - 1);
   }
 
   public void nextPicture(View view) {
