@@ -20,12 +20,12 @@ public class DrawingArea extends View {
   private static final float TOUCH_TOLERANCE = 4;
 
   Context context;
-  private Bitmap mBitmap;
-  private Canvas mCanvas;
-  private Path mPath;
-  private Paint mBitmapPaint;
-  private Paint mPaint;
-  private float mX, mY;
+  private Bitmap bitmap;
+  private Canvas canvas;
+  private Path path;
+  private Paint bitmapPaint;
+  private Paint paint;
+  private float touchX, touchY;
 
   public DrawingArea(Context context) {
     super(context);
@@ -44,22 +44,22 @@ public class DrawingArea extends View {
 
   public void setupDrawingArea(Context context) {
     this.context = context;
-    mPath = new Path();
-    mBitmapPaint = new Paint(Paint.DITHER_FLAG);
+    path = new Path();
+    bitmapPaint = new Paint(Paint.DITHER_FLAG);
 
-    mPaint = new Paint();
-    mPaint.setAntiAlias(true);
-    mPaint.setDither(true);
-    mPaint.setColor(Color.WHITE);
-    mPaint.setStyle(Paint.Style.STROKE);
-    mPaint.setStrokeJoin(Paint.Join.ROUND);
-    mPaint.setStrokeCap(Paint.Cap.ROUND);
-    mPaint.setStrokeWidth(12);
+    paint = new Paint();
+    paint.setAntiAlias(true);
+    paint.setDither(true);
+    paint.setColor(Color.WHITE);
+    paint.setStyle(Paint.Style.STROKE);
+    paint.setStrokeJoin(Paint.Join.ROUND);
+    paint.setStrokeCap(Paint.Cap.ROUND);
+    paint.setStrokeWidth(12);
 
   }
 
   public void setLayer(Bitmap bitmap, BitmapDrawable bitmapDrawable) {
-    mBitmap = bitmap;
+    this.bitmap = bitmap;
     setBackground(bitmapDrawable);
   }
 
@@ -67,8 +67,8 @@ public class DrawingArea extends View {
   public void setBackground(Drawable background) {
     super.setBackground(background);
 
-    if (mBitmap != null) {
-      mCanvas = new Canvas(mBitmap);
+    if (bitmap != null) {
+      canvas = new Canvas(bitmap);
     }
   }
 
@@ -79,8 +79,8 @@ public class DrawingArea extends View {
     Log.d(TAG, "Width  : " + w);
     Log.d(TAG, "Height : " + h);
 
-    if (mBitmap != null) {
-      mCanvas = new Canvas(mBitmap);
+    if (bitmap != null) {
+      canvas = new Canvas(bitmap);
     }
 
   }
@@ -89,44 +89,44 @@ public class DrawingArea extends View {
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
 
-    if (mBitmap != null ) {
-      canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+    if (bitmap != null ) {
+      canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);
     }
 
-    canvas.drawPath( mPath,  mPaint);
+    canvas.drawPath(path, paint);
 
   }
 
   public int getColor() {
-    return mPaint.getColor();
+    return paint.getColor();
   }
 
   public void setColor(int color) {
-    mPaint.setColor(color);
+    paint.setColor(color);
   }
 
-  private void touch_start(float x, float y) {
-    mPath.reset();
-    mPath.moveTo(x, y);
-    mX = x;
-    mY = y;
+  private void onTouchStart(float x, float y) {
+    path.reset();
+    path.moveTo(x, y);
+    touchX = x;
+    touchY = y;
   }
-  private void touch_move(float x, float y) {
-    float dx = Math.abs(x - mX);
-    float dy = Math.abs(y - mY);
+  private void onTouchMove(float x, float y) {
+    float dx = Math.abs(x - touchX);
+    float dy = Math.abs(y - touchY);
     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-      mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
-      mX = x;
-      mY = y;
+      path.quadTo(touchX, touchY, (x + touchX) / 2, (y + touchY) / 2);
+      touchX = x;
+      touchY = y;
 
     }
   }
-  private void touch_up() {
-    mPath.lineTo(mX, mY);
+  private void onTouchFinish () {
+    path.lineTo(touchX, touchY);
     // commit the path to our offscreen
-    mCanvas.drawPath(mPath,  mPaint);
+    canvas.drawPath(path, paint);
     // kill this so we don't double draw
-    mPath.reset();
+    path.reset();
   }
 
   @Override
@@ -136,14 +136,14 @@ public class DrawingArea extends View {
 
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
-        touch_start(x, y);
+        onTouchStart(x, y);
         break;
       case MotionEvent.ACTION_MOVE:
-        touch_move(x, y);
+        onTouchMove(x, y);
         invalidate();
         break;
       case MotionEvent.ACTION_UP:
-        touch_up();
+        onTouchFinish();
         invalidate();
         break;
     }

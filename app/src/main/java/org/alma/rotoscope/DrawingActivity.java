@@ -184,41 +184,51 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   public boolean onTouch(View v, MotionEvent event) {
     switch (event.getAction()) {
       case  MotionEvent.ACTION_DOWN:
-        shortPress = true;
+        onTouchDown();
         break;
 
       case MotionEvent.ACTION_MOVE:
-        shortPress = false;
-
-        handler.removeCallbacks(runHideMenu);
-        handler.post(runHideMenu);
-        runHideMenu = null;
-
+        onTouchMove();
         break;
 
       case MotionEvent.ACTION_UP:
-        if (shortPress) {
-
-          final View menu = findViewById(R.id.MenuLayout);
-          fade(menu, true);
-
-          final View nav = findViewById(R.id.navigationLayout);
-          fade(nav, true);
-
-          Log.d(TAG, "Menu visible");
-
-          runHideMenu = new Runnable() {
-            @Override
-            public void run() {
-              fade(menu, false);
-              fade(nav, false);
-              Log.d(TAG, "Menu invisible");
-            }
-          };
-          handler.postDelayed(runHideMenu, 5000);
-        }
+        onTouchUp();
     }
     return false;
+  }
+
+  private void onTouchDown() {
+    shortPress = true;
+  }
+
+  private void onTouchMove() {
+    shortPress = false;
+    handler.removeCallbacks(runHideMenu);
+    handler.post(runHideMenu);
+    runHideMenu = null;
+  }
+
+  private void onTouchUp() {
+    if (shortPress) {
+
+      final View menu = findViewById(R.id.MenuLayout);
+      fade(menu, true);
+
+      final View nav = findViewById(R.id.navigationLayout);
+      fade(nav, true);
+
+      Log.d(TAG, "Menu visible");
+
+      runHideMenu = new Runnable() {
+        @Override
+        public void run() {
+          fade(menu, false);
+          fade(nav, false);
+          Log.d(TAG, "Menu invisible");
+        }
+      };
+      handler.postDelayed(runHideMenu, 5000);
+    }
   }
 
   private void fade(final View v, boolean fadeIn) {
