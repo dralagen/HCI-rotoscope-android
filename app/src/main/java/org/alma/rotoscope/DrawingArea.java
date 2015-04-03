@@ -19,31 +19,60 @@ public class DrawingArea extends View {
   private static final String TAG = "DrawingArea";
   private static final float TOUCH_TOLERANCE = 4;
 
-  Context context;
+  /**
+   * contain the final result of my layer
+   */
   private Bitmap bitmap;
+
+  /**
+   * workspace to drawing
+   */
   private Canvas canvas;
+
+  /**
+   * helper drawing
+   */
   private Path path;
+
+  /**
+   * draw paint on bitmap
+   */
   private Paint bitmapPaint;
+
+  /**
+   * draw paint on canvas
+   */
   private Paint paint;
-  private float touchX, touchY;
+
+  /**
+   * start position X of finger when start drawing
+   */
+  private float touchX;
+  /**
+   * start position X of finger when start drawing
+   */
+  private float touchY;
 
   public DrawingArea(Context context) {
     super(context);
-    setupDrawingArea(context);
+    setupDrawingArea();
   }
 
   public DrawingArea(Context context, AttributeSet attrs) {
     super(context, attrs);
-    setupDrawingArea(context);
+    setupDrawingArea();
   }
 
   public DrawingArea(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    setupDrawingArea(context);
+    setupDrawingArea();
   }
 
-  public void setupDrawingArea(Context context) {
-    this.context = context;
+  /**
+   * Setup default paint options
+   */
+  public void setupDrawingArea() {
+    //this.context = context;
     path = new Path();
     bitmapPaint = new Paint(Paint.DITHER_FLAG);
 
@@ -58,9 +87,15 @@ public class DrawingArea extends View {
 
   }
 
-  public void setLayer(Bitmap bitmap, BitmapDrawable bitmapDrawable) {
+  /**
+   * Set new layer and draw on bitmap and set background
+   *
+   * @param bitmap contain the final layer result
+   * @param background the background
+   */
+  public void setLayer(Bitmap bitmap, BitmapDrawable background) {
     this.bitmap = bitmap;
-    setBackground(bitmapDrawable);
+    setBackground(background);
   }
 
   @Override
@@ -97,20 +132,40 @@ public class DrawingArea extends View {
 
   }
 
+  /**
+   * Get color of current paint
+   * @return color of current paint
+   */
   public int getColor() {
     return paint.getColor();
   }
 
+  /**
+   * Set color of current paint
+   * @param color color of new paint
+   */
   public void setColor(int color) {
     paint.setColor(color);
   }
 
+  /**
+   * Start drawing to the position (x,y)
+   * @param x position x of finger
+   * @param y position y of finger
+   */
   private void onTouchStart(float x, float y) {
     path.reset();
     path.moveTo(x, y);
     touchX = x;
     touchY = y;
   }
+
+  /**
+   * Draw line if the gesture respect the TOUCH_TOLERANCE
+   *
+   * @param x position x of finger
+   * @param y position y of finger
+   */
   private void onTouchMove(float x, float y) {
     float dx = Math.abs(x - touchX);
     float dy = Math.abs(y - touchY);
@@ -121,6 +176,10 @@ public class DrawingArea extends View {
 
     }
   }
+
+  /**
+   * End of gesture, draw line between start point and end point
+   */
   private void onTouchFinish () {
     path.lineTo(touchX, touchY);
     // commit the path to our offscreen
