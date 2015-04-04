@@ -28,6 +28,11 @@ android {
     }
     productFlavors {
     }
+    buildTypes {
+        release {
+            minifyEnabled true
+        }
+    }
 }
 
 dependencies {
