@@ -6,45 +6,52 @@
 
   <view class="org.alma.rotoscope.DrawingArea" android:layout_width="fill_parent" android:layout_height="fill_parent"
         android:id="@+id/drawingAreaView" android:background="@android:color/background_dark"/>
-  <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content"
-                  android:layout_gravity="center_vertical|bottom" android:layout_alignParentBottom="true"
+  <RelativeLayout android:layout_width="fill_parent" android:layout_height="50pt"
+                  android:layout_gravity="center_vertical|bottom"
                   android:orientation="horizontal" android:id="@+id/navigationLayout"
-                  android:animateLayoutChanges="true">
-    <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:animateLayoutChanges="true" android:layout_alignParentBottom="true"
+                  android:layout_alignParentStart="true">
+    <ImageView android:layout_width="wrap_content" android:layout_height="fill_parent"
             android:id="@+id/PreviousButton" android:layout_alignParentTop="true" android:layout_marginTop="0dp"
-            android:onClick="previousPicture" android:src="@android:drawable/ic_media_previous"
+            android:onClick="previousPicture" android:src="@drawable/ic_action_previous_item"
             android:contentDescription="@string/button_previousButton" android:layout_alignParentRight="false"
-                 android:layout_alignParentLeft="true"/>
-    <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content"
+                 android:layout_alignParentLeft="true"
+               android:clickable="true" android:scaleType="fitXY"/>
+    <ImageView android:layout_width="wrap_content" android:layout_height="fill_parent"
             android:id="@+id/NextButton"
             android:layout_alignParentTop="true"
                  android:onClick="nextPicture"
-            android:src="@android:drawable/ic_media_next" android:contentDescription="@string/button_nextButton"
-                 android:layout_marginTop="0dp" android:layout_alignParentRight="true"/>
+            android:src="@drawable/ic_action_next_item" android:contentDescription="@string/button_nextButton"
+                 android:layout_marginTop="0dp" android:layout_alignParentRight="true" android:clickable="true"
+               android:scaleType="fitXY"/>
   </RelativeLayout>
   <LinearLayout
       android:orientation="vertical"
       android:layout_width="wrap_content" android:animateLayoutChanges="true"
       android:layout_height="fill_parent" android:id="@+id/MenuLayout" android:layout_alignParentLeft="false"
       android:layout_alignParentTop="true" android:layout_alignParentRight="true">
-    <ImageButton
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/saveButton"
-        android:src="@android:drawable/ic_menu_save" android:contentDescription="@string/button_save"/>
-    <ImageButton
+        android:src="@android:drawable/ic_menu_save" android:contentDescription="@string/button_save"
+        android:onClick="saveVideo" android:layout_marginBottom="4pt" android:clickable="true"/>
+    <ImageView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/shareButton" android:src="@android:drawable/ic_menu_share" android:contentDescription="@string/button_share"/>
-    <ImageButton
+        android:id="@+id/shareButton" android:src="@android:drawable/ic_menu_share" android:contentDescription="@string/button_share"
+        android:onClick="shareVideo" android:layout_marginBottom="16pt" android:clickable="true"/>
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/colorPickerButton" android:src="@android:drawable/ic_menu_edit" android:onClick="pickColor"
-        android:contentDescription="@string/button_colorPicker"/>
-    <ImageButton
+        android:contentDescription="@string/button_colorPicker" android:layout_marginBottom="4pt"
+        android:clickable="true"/>
+    <ImageView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/eraseButton" android:src="@android:drawable/ic_menu_delete" android:onClick="erasePicture"
-        android:contentDescription="@string/button_clearLayer"/>
+        android:contentDescription="@string/button_clearLayer" android:layout_marginBottom="4pt"
+        android:clickable="true"/>
   </LinearLayout>
 </RelativeLayout>
