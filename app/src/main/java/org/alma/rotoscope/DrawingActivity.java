@@ -85,6 +85,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    */
   private boolean shortPress;
 
+  /**
+   * File output of result video
+   */
+  private File outputVideo;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -100,6 +105,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
 
       Bundle bundle = getIntent().getExtras();
       String resourcePath = bundle.getString("resourcePath");
+      outputVideo = null;
 
       Log.d(TAG, "resource=" + resourcePath);
 
@@ -245,21 +251,38 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    * @param view android view
    */
   public void saveVideo(View view) {
-    String outputVideoName = new SimpleDateFormat("yyyyMMdd_HHmmss",
-        Locale.getDefault())
-        .format(new Date());
+    if (outputVideo == null) {
+      String outputVideoName = new SimpleDateFormat("yyyyMMdd_HHmmss",
+          Locale.getDefault())
+          .format(new Date());
 
-    File outputVideo = new File(Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_MOVIES),
-        outputVideoName + ".mp4"
-    );
+      // create basedir
+      outputVideo = new File(Environment.getExternalStoragePublicDirectory(
+          Environment.DIRECTORY_MOVIES), String.valueOf(R.string.app_name));
+
+      if (outputVideo.isDirectory() || outputVideo.mkdirs()) {
+        outputVideo = new File(outputVideo,
+            outputVideoName + ".mp4"
+        );
+      }
+      else {
+        Toast.makeText(this, "Error directory " + outputVideo.getAbsolutePath() +
+            " can't created",
+            Toast.LENGTH_LONG)
+            .show();
+        return;
+      }
+    }
 
     Log.d(TAG, "outputVideo=" + outputVideo.getAbsolutePath());
 
     try {
       SequenceEncoder encoder = new SequenceEncoder(outputVideo);
       for (Bitmap frame : layers) {
-        encoder.encodeNativeFrame(fromBitmap(frame));
+        Picture outputFrame = fromBitmap(frame);
+        for (int i = 0; i <= rateFps; ++i) {
+          encoder.encodeNativeFrame(outputFrame);
+        }
       }
       encoder.finish();
 
