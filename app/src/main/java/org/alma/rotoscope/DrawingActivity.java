@@ -185,8 +185,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     Bitmap background = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
     drawingArea.setLayer(layers.get(currentPicture), new BitmapDrawable(getResources(), background));
 
-    findViewById(R.id.PreviousButton).setEnabled(currentPicture != 0);
-    findViewById(R.id.NextButton).setEnabled(currentPicture < layers.size() - 1);
+    findViewById(R.id.PreviousButton).setVisibility((currentPicture != 0) ? View.VISIBLE : View.INVISIBLE);
+    findViewById(R.id.NextButton).setVisibility((currentPicture < layers.size() - 1) ? View.VISIBLE : View.INVISIBLE);
   }
 
   /**
