@@ -108,14 +108,14 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       String resourcePath = bundle.getString("resourcePath");
       outputVideo = null;
 
-      Log.d(TAG, "resource=" + resourcePath);
+      Log.v(TAG, "resource=" + resourcePath);
 
       metadata = new MediaMetadataRetriever();
       metadata.setDataSource(this, Uri.parse(resourcePath));
 
       nbImageInput = (int)(Float.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)) / 1000 * inputFps);
-      Log.d(TAG, "nbImageInput=" + nbImageInput);
-      Log.d(TAG, "rateFps=" + rateFps);
+      Log.v(TAG, "nbImageInput=" + nbImageInput);
+      Log.v(TAG, "rateFps=" + rateFps);
     }
 
     { // find screen orientation
@@ -124,18 +124,18 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       int videoHeight = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
       int videoRotation = Integer.valueOf(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
 
-      Log.d(TAG, "videoWidth=" + videoWidth);
-      Log.d(TAG, "videoHeight=" + videoHeight);
-      Log.d(TAG, "videoRotation=" + videoRotation);
+      Log.v(TAG, "videoWidth=" + videoWidth);
+      Log.v(TAG, "videoHeight=" + videoHeight);
+      Log.v(TAG, "videoRotation=" + videoRotation);
 
 
       if ((videoWidth < videoHeight && (videoRotation == 0 || videoRotation == 180))
           || (videoWidth > videoHeight && (videoRotation == 90 || videoRotation == 270))) {
         // portrait
-        Log.d(TAG, "screenRotation to portrait");
+        Log.v(TAG, "screenRotation to portrait");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
       } else { // landscape
-        Log.d(TAG, "screenRotation to landscape");
+        Log.v(TAG, "screenRotation to landscape");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
       }
 
@@ -146,11 +146,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       // get screen size
       Point size = new Point();
       getWindowManager().getDefaultDisplay().getSize(size);
-      Log.d(TAG, "size : " + size.x + "x" + size.y);
+      Log.v(TAG, "size : " + size.x + "x" + size.y);
 
       // create all final bitmap
       int nbImageOutput = (int) (nbImageInput / rateFps);
-      Log.d(TAG, "nbImageOutput=" + nbImageOutput);
+      Log.v(TAG, "nbImageOutput=" + nbImageOutput);
       layers = new ArrayList<>(nbImageOutput);
       for (int i = 0; i < nbImageOutput; ++i) {
         layers.add(Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
@@ -198,8 +198,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     // calculate the good time for a specific frame correspond currentPicture into video
     long time = (long) (rateFps * (currentPicture * 1000000 / inputFps));
 
-    Log.d(TAG, "show picture " + currentPicture);
-    Log.d(TAG, "show Frame at " + time);
+    Log.v(TAG, "show picture " + currentPicture);
+    Log.v(TAG, "show Frame at " + time);
 
     Bitmap background = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
     drawingArea.setLayer(layers.get(currentPicture), new BitmapDrawable(getResources(), background));
@@ -289,7 +289,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
           }
         }
 
-        Log.d(TAG, "Start encoding in " + outputVideo.getAbsolutePath());
+        Log.v(TAG, "Start encoding in " + outputVideo.getAbsolutePath());
         try {
           SequenceEncoder encoder = new SequenceEncoder(outputVideo);
           for (Bitmap frame : layers) {
@@ -305,7 +305,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
           e.printStackTrace();
         }
 
-        Log.d(TAG, "Encoding finish");
+        Log.v(TAG, "Encoding finish");
         saveProgress.dismiss();
       }
     });
@@ -440,14 +440,14 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       final View nav = findViewById(R.id.navigationLayout);
       fade(nav, true);
 
-      Log.d(TAG, "Menu visible");
+      Log.v(TAG, "Menu visible");
 
       runHideMenu = new Runnable() {
         @Override
         public void run() {
           fade(menu, false);
           fade(nav, false);
-          Log.d(TAG, "Menu invisible");
+          Log.v(TAG, "Menu invisible");
         }
       };
       handler.postDelayed(runHideMenu, 5000);

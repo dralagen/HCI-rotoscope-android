@@ -367,8 +367,6 @@ public class ColorPickerView extends View{
 		
 		canvas.drawRoundRect(r, 2, 2, mHueAlphaTrackerPaint);
 		
-		//Log.d("mColorPicker", "Draw Time Hue: " + (SystemClock.elapsedRealtime() - start) + "ms");
-		
 	}
 	
 	private void drawAlphaPanel(Canvas canvas) {
@@ -723,9 +721,7 @@ public class ColorPickerView extends View{
 		int widthAllowed = MeasureSpec.getSize(widthMeasureSpec);
 		int heightAllowed = MeasureSpec.getSize(heightMeasureSpec);
 		
-		
-		//Log.d("color-picker-view", "widthMode: " + modeToString(widthMode) + " heightMode: " + modeToString(heightMode) + " widthAllowed: " + widthAllowed + " heightAllowed: " + heightAllowed);
-				
+
 		if(widthMode == MeasureSpec.EXACTLY || heightMode == MeasureSpec.EXACTLY) {
 			//A exact value has been set in either direction, we need to stay within this size.
 			
@@ -802,9 +798,7 @@ public class ColorPickerView extends View{
 				finalHeight = heightNeeded;
 				finalWidth = widthAllowed;
 			}
-		}			
-		
-		//Log.d("mColorPicker", "Final Size: " + finalWidth + "x" + finalHeight);
+		}
 		
 		setMeasuredDimension(finalWidth, finalHeight);
 	}

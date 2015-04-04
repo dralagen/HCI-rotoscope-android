@@ -111,8 +111,8 @@ public class DrawingArea extends View {
   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
 
-    Log.d(TAG, "Width  : " + w);
-    Log.d(TAG, "Height : " + h);
+    Log.v(TAG, "Width  : " + w);
+    Log.v(TAG, "Height : " + h);
 
     if (bitmap != null) {
       canvas = new Canvas(bitmap);
