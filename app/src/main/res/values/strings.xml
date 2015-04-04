@@ -16,6 +16,7 @@
     <string name="button_share">Share</string>
     <string name="button_clearLayer">Reset Layer</string>
     <string name="button_colorPicker">Change color</string>
+    <string name="send_to">Share your video</string>
 
 
 </resources>

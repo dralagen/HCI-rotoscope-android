@@ -3,7 +3,9 @@ package org.alma.rotoscope;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
@@ -18,7 +20,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 import org.alma.rotoscope.colorpicker.ColorPickerDialog;
 import org.jcodec.api.SequenceEncoder;
 import org.jcodec.common.model.ColorSpace;
@@ -168,7 +169,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       colorPicker.setAlphaSliderVisible(true);
       colorPicker.setButton(DialogInterface.BUTTON_POSITIVE, "Ok", new DialogInterface.OnClickListener() {
         @Override
-        public void onClick (DialogInterface dialog, int which) {
+        public void onClick(DialogInterface dialog, int which) {
           drawingArea.setColor(colorPicker.getColor());
         }
       });
@@ -247,55 +248,70 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   /**
    * Assemble all picture drawn on layers to one video on external storage in directory movies.
    *
-   * TODO dralagen 4/4/15 : storage video in directory getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), String.valueOf(R.string.app_name)
    * @param view android view
    */
   public void saveVideo(View view) {
-    if (outputVideo == null) {
-      String outputVideoName = new SimpleDateFormat("yyyyMMdd_HHmmss",
-          Locale.getDefault())
-          .format(new Date());
+    encodeVideo();
+  }
 
-      // create basedir
-      outputVideo = new File(Environment.getExternalStoragePublicDirectory(
-          Environment.DIRECTORY_MOVIES), String.valueOf(R.string.app_name));
+  /**
+   * Assemble all picture drawn on layers to one video on external storage in directory movies.
+   *
+   * @return thread launch to encode video
+   */
+  public Thread encodeVideo() {
+    final ProgressDialog saveProgress = new ProgressDialog(this);
+    saveProgress.setMessage("Encoding video in progress");
+    saveProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+    saveProgress.setIndeterminate(true);
+    saveProgress.setMax(layers.size());
+    saveProgress.setCancelable(false);
+    saveProgress.show();
 
-      if (outputVideo.isDirectory() || outputVideo.mkdirs()) {
-        outputVideo = new File(outputVideo,
-            outputVideoName + ".mp4"
-        );
-      }
-      else {
-        Toast.makeText(this, "Error directory " + outputVideo.getAbsolutePath() +
-            " can't created",
-            Toast.LENGTH_LONG)
-            .show();
-        return;
-      }
-    }
+    Thread encodeVideoThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        if (outputVideo == null) {
+          String outputVideoName = new SimpleDateFormat("yyyyMMdd_HHmmss",
+              Locale.getDefault())
+              .format(new Date());
 
-    Log.d(TAG, "outputVideo=" + outputVideo.getAbsolutePath());
+          // create basedir
+          outputVideo = new File(Environment.getExternalStoragePublicDirectory(
+              Environment.DIRECTORY_MOVIES), String.valueOf(getResources().getText(R.string.app_name)));
 
-    try {
-      SequenceEncoder encoder = new SequenceEncoder(outputVideo);
-      for (Bitmap frame : layers) {
-        Picture outputFrame = fromBitmap(frame);
-        for (int i = 0; i <= rateFps; ++i) {
-          encoder.encodeNativeFrame(outputFrame);
+          if (outputVideo.isDirectory() || outputVideo.mkdirs()) {
+            outputVideo = new File(outputVideo,
+                outputVideoName + ".mp4"
+            );
+          } else {
+            return;
+          }
         }
+
+        Log.d(TAG, "Start encoding in " + outputVideo.getAbsolutePath());
+        try {
+          SequenceEncoder encoder = new SequenceEncoder(outputVideo);
+          for (Bitmap frame : layers) {
+            saveProgress.incrementProgressBy(1);
+            Picture outputFrame = fromBitmap(frame);
+            for (int i = 0; i <= rateFps; ++i) {
+              encoder.encodeNativeFrame(outputFrame);
+            }
+          }
+          encoder.finish();
+
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+
+        Log.d(TAG, "Encoding finish");
+        saveProgress.dismiss();
       }
-      encoder.finish();
+    });
+    encodeVideoThread.start();
 
-      Toast.makeText(this, "Video is finish on " + outputVideo.getAbsolutePath(),
-          Toast.LENGTH_LONG)
-          .show();
-    } catch (IOException e) {
-      e.printStackTrace();
-      Toast.makeText(this, "Error when try to encode all picture in video",
-          Toast.LENGTH_LONG)
-          .show();
-
-    }
+    return encodeVideoThread;
   }
 
   /**
@@ -330,6 +346,31 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    * @param view android view
    */
   public void shareVideo(View view) {
+    final Thread encodeVideoThread = (outputVideo == null) ? encodeVideo() : new Thread();
+
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          encodeVideoThread.join();
+
+          //TODO dralagen 4/4/15 : use FileProvider to get Uri
+
+          Uri videoUri = Uri.fromFile(outputVideo);
+
+          Intent shareIntent = new Intent();
+          shareIntent.setAction(Intent.ACTION_SEND);
+          shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri);
+          shareIntent.setType("video/mp4");
+
+          startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.send_to)));
+
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+
+      }
+    }).start();
   }
 
   /**
