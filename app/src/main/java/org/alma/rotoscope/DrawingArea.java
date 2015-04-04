@@ -10,7 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 /**
- * Created on 3/29/15.
+ * This view create an drawing area only, no button or option are create.
  *
  * @author dralagen
  */
@@ -178,7 +178,7 @@ public class DrawingArea extends View {
   }
 
   /**
-   * End of gesture, draw line between start point and end point
+   * End of gesture, commit the draw
    */
   private void onTouchFinish () {
     path.lineTo(touchX, touchY);

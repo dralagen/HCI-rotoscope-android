@@ -16,7 +16,12 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-
+/**
+ * The Main Activity is launch at startup.
+ * This activity create new project from new video or from a video on InternalStorage
+ *
+ * @author dralagen
+ */
 public class MainActivity extends Activity {
 
   private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;

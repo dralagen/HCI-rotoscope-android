@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
 /**
- * Created on 3/30/15.
+ * Create the preference activity of Rotoscope program.
  *
  * @author dralagen
  */
