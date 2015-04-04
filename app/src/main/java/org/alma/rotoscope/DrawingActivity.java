@@ -382,6 +382,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    * @throws IOException
    */
   private void copy(File src, File dst) throws IOException {
+    File dstParent = dst.getParentFile();
+    if (!dstParent.exists()) {
+      dstParent.mkdirs();
+    }
+
     InputStream in = new FileInputStream(src);
     OutputStream out = new FileOutputStream(dst);
 
