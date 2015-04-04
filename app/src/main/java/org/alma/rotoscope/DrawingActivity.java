@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,8 +26,7 @@ import org.jcodec.api.SequenceEncoder;
 import org.jcodec.common.model.ColorSpace;
 import org.jcodec.common.model.Picture;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -342,7 +342,6 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   /**
    * Take the result of saveVideo and share it.
    *
-   * TODO dralagen 4/4/15 : share video result
    * @param view android view
    */
   public void shareVideo(View view) {
@@ -354,9 +353,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         try {
           encodeVideoThread.join();
 
-          //TODO dralagen 4/4/15 : use FileProvider to get Uri
+          File shareFile = new File(new File(getApplicationContext().getCacheDir(), "video"), outputVideo.getName());
+          Uri videoUri = FileProvider.getUriForFile(getApplicationContext(), "org.alma.rotoscope.fileprovider", shareFile);
+          grantUriPermission("org.alma.rotoscope.fileprovider", videoUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-          Uri videoUri = Uri.fromFile(outputVideo);
+          copy(outputVideo, shareFile);
 
           Intent shareIntent = new Intent();
           shareIntent.setAction(Intent.ACTION_SEND);
@@ -365,12 +366,33 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
 
           startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.send_to)));
 
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException e) {
           e.printStackTrace();
         }
 
       }
     }).start();
+  }
+
+  /**
+   * Copy the content of src into dest file
+   *
+   * @param src source file
+   * @param dst destination file
+   * @throws IOException
+   */
+  private void copy(File src, File dst) throws IOException {
+    InputStream in = new FileInputStream(src);
+    OutputStream out = new FileOutputStream(dst);
+
+    // Transfer bytes from in to out
+    byte[] buf = new byte[1024];
+    int len;
+    while ((len = in.read(buf)) > 0) {
+      out.write(buf, 0, len);
+    }
+    in.close();
+    out.close();
   }
 
   /**
