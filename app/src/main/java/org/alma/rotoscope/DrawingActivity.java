@@ -12,13 +12,25 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 import org.alma.rotoscope.colorpicker.ColorPickerDialog;
+import org.jcodec.api.SequenceEncoder;
+import org.jcodec.common.model.ColorSpace;
+import org.jcodec.common.model.Picture;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -56,7 +68,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   /**
    * All layers will drawn
    */
-  private SparseArray<Bitmap> layers;
+  private List<Bitmap> layers;
 
   /**
    * A color picker dialog to change the paint color
@@ -132,9 +144,9 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       // create all final bitmap
       int nbImageOutput = (int) (nbImageInput / rateFps);
       Log.d(TAG, "nbImageOutput=" + nbImageOutput);
-      layers = new SparseArray<>(nbImageOutput);
+      layers = new ArrayList<>(nbImageOutput);
       for (int i = 0; i < nbImageOutput; ++i) {
-        layers.put(i, Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
+        layers.add(Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
       }
 
       setContentView(R.layout.activity_drawing);
@@ -222,7 +234,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   public void erasePicture(View view) {
     Point size = new Point();
     getWindowManager().getDefaultDisplay().getSize(size);
-    layers.put(currentPicture, Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
+    layers.add(currentPicture, Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
     setLayer();
   }
 
@@ -233,6 +245,59 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    * @param view android view
    */
   public void saveVideo(View view) {
+    String outputVideoName = new SimpleDateFormat("yyyyMMdd_HHmmss",
+        Locale.getDefault())
+        .format(new Date());
+
+    File outputVideo = new File(Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_MOVIES),
+        outputVideoName + ".mp4"
+    );
+
+    Log.d(TAG, "outputVideo=" + outputVideo.getAbsolutePath());
+
+    try {
+      SequenceEncoder encoder = new SequenceEncoder(outputVideo);
+      for (Bitmap frame : layers) {
+        encoder.encodeNativeFrame(fromBitmap(frame));
+      }
+      encoder.finish();
+
+      Toast.makeText(this, "Video is finish on " + outputVideo.getAbsolutePath(),
+          Toast.LENGTH_LONG)
+          .show();
+    } catch (IOException e) {
+      e.printStackTrace();
+      Toast.makeText(this, "Error when try to encode all picture in video",
+          Toast.LENGTH_LONG)
+          .show();
+
+    }
+  }
+
+  /**
+   * Convert a Bitmap to a Picture
+   * @param frame Bitmap to convert
+   * @return the convert result
+   */
+  private Picture fromBitmap(Bitmap frame) {
+    Picture dst = Picture.create(frame.getWidth(), frame.getHeight(), ColorSpace.RGB);
+
+    int[] dstData = dst.getPlaneData(0);
+    int[] packed = new int[frame.getWidth() * frame.getHeight()];
+
+    frame.getPixels(packed, 0, frame.getWidth(), 0, 0, frame.getWidth(), frame.getHeight());
+
+    for (int i = 0, frameOff = 0, dstOff = 0; i < frame.getHeight(); i++) {
+      for (int j = 0; j < frame.getWidth(); j++, frameOff++, dstOff += 3) {
+        int rgb = packed[frameOff];
+        dstData[dstOff]     = (rgb >> 16) & 0xff;
+        dstData[dstOff + 1] = (rgb >> 8) & 0xff;
+        dstData[dstOff + 2] = rgb & 0xff;
+      }
+    }
+    
+    return dst;
   }
 
   /**
