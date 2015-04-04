@@ -241,7 +241,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   public void erasePicture(View view) {
     Point size = new Point();
     getWindowManager().getDefaultDisplay().getSize(size);
-    layers.add(currentPicture, Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
+    layers.set(currentPicture, Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
     setLayer();
   }
 
