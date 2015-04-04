@@ -227,6 +227,24 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   }
 
   /**
+   * Assemble all picture drawn on layers to one video on external storage in directory movies.
+   *
+   * TODO dralagen 4/4/15 : storage video in directory getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), String.valueOf(R.string.app_name)
+   * @param view android view
+   */
+  public void saveVideo(View view) {
+  }
+
+  /**
+   * Take the result of saveVideo and share it.
+   *
+   * TODO dralagen 4/4/15 : share video result
+   * @param view android view
+   */
+  public void shareVideo(View view) {
+  }
+
+  /**
    * Show the color picker of the paint
    * @param view android view
    */
