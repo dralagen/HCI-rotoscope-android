@@ -110,7 +110,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       int maxCache = currentPicture + 5;
 
       // loop take more large of [minCache,maxCache] to free memory
-      for (int i = Math.max(minCache*2, 0); i <= Math.min(maxCache*2,layers.size()); ++i) {
+      for (int i = Math.max(minCache*2, 0); i < Math.min(maxCache*2,layers.size()); ++i) {
         if (minCache <= i  && i <= maxCache) { // cache
           if (cache.get(i) == null) { // if not exist
             cache.set(i, getFrameVideo(i));
