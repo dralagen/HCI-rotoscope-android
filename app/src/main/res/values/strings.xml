@@ -17,6 +17,7 @@
     <string name="button_clearLayer">Reset Layer</string>
     <string name="button_colorPicker">Change color</string>
     <string name="send_to">Share your video</string>
+    <string name="button_toggleBackground">Toggle Background</string>
 
 
 </resources>

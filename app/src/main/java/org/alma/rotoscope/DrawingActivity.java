@@ -67,6 +67,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   private int currentPicture;
 
   /**
+   * Contain the current frame of video
+   */
+  private Bitmap currentFrame;
+
+  /**
    * All layers will drawn
    */
   private List<Bitmap> layers;
@@ -201,8 +206,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     Log.v(TAG, "show picture " + currentPicture);
     Log.v(TAG, "show Frame at " + time);
 
-    Bitmap background = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
-    drawingArea.setLayer(layers.get(currentPicture), new BitmapDrawable(getResources(), background));
+    currentFrame = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
+    drawingArea.setLayer(layers.get(currentPicture), new BitmapDrawable(getResources(), currentFrame));
 
     findViewById(R.id.PreviousButton).setVisibility((currentPicture != 0) ? View.VISIBLE : View.INVISIBLE);
     findViewById(R.id.NextButton).setVisibility((currentPicture < layers.size() - 1) ? View.VISIBLE : View.INVISIBLE);
@@ -406,6 +411,24 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    */
   public void pickColor(View view) {
     colorPicker.show();
+  }
+
+  /**
+   * Toggle background between currentFrame and no image
+   * @param view android view
+   */
+  public void toggleBackground(View view) {
+    BitmapDrawable background;
+    if (view.getAlpha() != 1.0)  {
+      background = new BitmapDrawable(getResources(),
+          Bitmap.createBitmap(currentFrame.getWidth(), currentFrame.getHeight(), Bitmap.Config.RGB_565)
+      );
+      view.setAlpha(1.0f);
+    } else {
+      background = new BitmapDrawable(getResources(), currentFrame);
+      view.setAlpha(0.5f);
+    }
+    findViewById(R.id.drawingAreaView).setBackground(background);
   }
 
   @Override
