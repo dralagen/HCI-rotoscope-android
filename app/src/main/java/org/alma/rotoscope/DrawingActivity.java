@@ -596,7 +596,6 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
           Log.v(TAG, "Menu invisible");
         }
       };
-      handler.postDelayed(runHideMenu, 5000);
     }
   }
 
