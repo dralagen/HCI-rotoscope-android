@@ -125,7 +125,14 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     }
   };
 
+  /**
+   * Thread to recalculate the cache frames of input video
+   */
   private Thread invalidCacheThread;
+
+  /**
+   * True to show the input video frame to background of DrawingArea
+   */
   private boolean showBackground;
 
   @Override
@@ -295,6 +302,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     }
   }
 
+  /**
+   * Send some action as refresh background and layer to DrawingArea,
+   * Update numFrameLabel,
+   * Set visible or invisible if can or not go to next picture or previous picture.
+   */
   private void refreshDrawingArea() {
     DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
     drawingArea.setLayer(layers.get(currentPicture));
@@ -485,6 +497,10 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     }).start();
   }
 
+  /**
+   * Use intent Intent.ACTION_VIEW to read the output video
+   * @param vew android view
+   */
   public void playVideo(View vew) {
     final Thread encodeVideoThread = (outputVideo == null) ? encodeVideo() : new Thread();
 
@@ -653,6 +669,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     }
   }
 
+  /**
+   * Get a Frame to input video at a specific picture
+   * @param at index of picture
+   * @return the Bitmap correspond to the good frame resize to screen size
+   */
   private Bitmap getFrameVideo(int at) {
     // calculate the good time for a specific frame correspond currentPicture into video
     final Point screen = new Point();
@@ -672,6 +693,9 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     }
   }
 
+  /**
+   * Invalid cache to run invalidCacheRunnable if no thread is already run
+   */
   private synchronized void invalidCache() {
     if (!invalidCacheThread.isAlive()) {
       invalidCacheThread = new Thread(invalidCacheRunnable);
