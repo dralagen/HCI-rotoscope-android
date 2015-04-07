@@ -125,6 +125,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   };
 
   private Thread invalidCacheThread;
+  private boolean showBackground;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -198,6 +199,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       final DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
       drawingArea.setOnTouchListener(this);
       currentPicture = 0;
+      showBackground = true;
+
       setLayer();
 
       cache.set(currentPicture, currentFrame);
@@ -275,7 +278,9 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   private void refreshDrawingArea() {
     DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
     drawingArea.setLayer(layers.get(currentPicture));
-    drawingArea.setBackground(new BitmapDrawable(getResources(), currentFrame));
+    if (showBackground) {
+      drawingArea.setBackground(new BitmapDrawable(getResources(), currentFrame));
+    }
 
     findViewById(R.id.PreviousButton).setVisibility((currentPicture != 0) ? View.VISIBLE : View.INVISIBLE);
     findViewById(R.id.NextButton).setVisibility((currentPicture < layers.size() - 1) ? View.VISIBLE : View.INVISIBLE);
@@ -498,7 +503,12 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    */
   public void toggleBackground(View view) {
     BitmapDrawable background;
-    if (view.getAlpha() != 1.0)  {
+    showBackground = !showBackground;
+
+    if (showBackground) {
+      background = new BitmapDrawable(getResources(), currentFrame);
+      view.setAlpha(0.5f);
+    } else {
       Point size = new Point();
       getWindowManager().getDefaultDisplay().getSize(size);
 
@@ -506,10 +516,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
           Bitmap.createBitmap(size.x, size.y, Bitmap.Config.RGB_565)
       );
       view.setAlpha(1.0f);
-    } else {
-      background = new BitmapDrawable(getResources(), currentFrame);
-      view.setAlpha(0.5f);
     }
+
     findViewById(R.id.drawingAreaView).setBackground(background);
   }
 
