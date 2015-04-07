@@ -233,6 +233,31 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     }
   }
 
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+
+    invalidCacheThread.interrupt();
+    try {
+      invalidCacheThread.join();
+    } catch (InterruptedException ignore) {}
+
+    for (int i = 0; i < cache.size(); i++) {
+      cache.set(i, null);
+      layers.set(i, null);
+    }
+
+    layers = null;
+
+    currentFrame = null;
+    currentPicture = 0;
+
+    metadata.release();
+
+    System.gc();
+
+  }
+
   /**
    * Select the currentPicture into layers and the good frame form the input video,
    * and pass all at the DrawingArea and use them to drawing into current picture and show good frame.
