@@ -190,7 +190,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       Log.v(TAG, "nbImageOutput=" + nbImageOutput);
       layers = new ArrayList<>(nbImageOutput);
       for (int i = 0; i < nbImageOutput; ++i) {
-        layers.add(Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
+        layers.add(Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_4444));
         cache.add(null);
       }
 
@@ -655,9 +655,18 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
 
   private Bitmap getFrameVideo(int at) {
     // calculate the good time for a specific frame correspond currentPicture into video
+    final Point screen = new Point();
+    getWindowManager().getDefaultDisplay().getSize(screen);
+
     long time = (long) (rateFps * (at * 1000000 / inputFps));
+
+    Bitmap frame = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
+    if (frame == null) {
+      frame = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+    }
+
     try {
-      return metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
+      return Bitmap.createScaledBitmap(frame, screen.x, screen.y, false);
     } catch (Exception e) {
       return null;
     }
