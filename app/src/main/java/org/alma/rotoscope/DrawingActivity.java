@@ -485,6 +485,23 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     }).start();
   }
 
+  public void playVideo(View vew) {
+    final Thread encodeVideoThread = (outputVideo == null) ? encodeVideo() : new Thread();
+
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          encodeVideoThread.join();
+        } catch (InterruptedException ignore) {}
+
+        Intent viewIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(outputVideo.getParent()));
+        viewIntent.setDataAndType(Uri.parse(outputVideo.getPath()), "video/mp4");
+        startActivity(viewIntent);
+      }
+    }).start();
+  }
+
   /**
    * Copy the content of src into dest file
    *

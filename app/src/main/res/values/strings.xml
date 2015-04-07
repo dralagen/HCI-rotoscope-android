@@ -18,6 +18,7 @@
     <string name="button_colorPicker">Change color</string>
     <string name="send_to">Share your video</string>
     <string name="button_toggleBackground">Toggle Background</string>
+    <string name="button_play">Play</string>
 
 
 </resources>

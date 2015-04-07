@@ -42,7 +42,12 @@
         android:src="@android:drawable/ic_menu_save" android:contentDescription="@string/button_save"
         android:onClick="saveVideo" android:layout_marginBottom="4pt" android:clickable="true"/>
     <ImageView
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/playButton" android:layout_marginBottom="4pt" android:src="@android:drawable/ic_media_play"
+        android:onClick="playVideo" android:clickable="true" android:contentDescription="@string/button_play"/>
+    <ImageView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/shareButton" android:src="@android:drawable/ic_menu_share" android:contentDescription="@string/button_share"
         android:onClick="shareVideo" android:layout_marginBottom="16pt" android:clickable="true"/>
@@ -53,13 +58,13 @@
         android:contentDescription="@string/button_colorPicker" android:layout_marginBottom="4pt"
         android:clickable="true"/>
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/toggleBackgroundButton" android:src="@android:drawable/ic_menu_gallery" android:onClick="toggleBackground"
         android:contentDescription="@string/button_toggleBackground" android:layout_marginBottom="4pt"
         android:clickable="true" android:focusable="false" android:alpha="0.5"/>
     <ImageView
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/eraseButton" android:src="@android:drawable/ic_menu_delete" android:onClick="erasePicture"
         android:contentDescription="@string/button_clearLayer" android:layout_marginBottom="4pt"
