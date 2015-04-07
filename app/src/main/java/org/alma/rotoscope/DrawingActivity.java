@@ -222,12 +222,6 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         }
       });
 
-      // hidden all menu
-      final View menu = findViewById(R.id.MenuLayout);
-      fade(menu, 5000, false);
-      final View nav = findViewById(R.id.navigationLayout);
-      fade(nav, 5000, false);
-
       // launch cache
       invalidCacheThread = new Thread(invalidCacheRunnable);
       invalidCacheThread.start();
