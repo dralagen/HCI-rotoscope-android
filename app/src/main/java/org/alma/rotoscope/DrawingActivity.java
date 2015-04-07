@@ -186,9 +186,9 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
 
       // hidden all menu
       final View menu = findViewById(R.id.MenuLayout);
-      menu.setVisibility(View.INVISIBLE);
+      fade(menu, 5000, false);
       final View nav = findViewById(R.id.navigationLayout);
-      nav.setVisibility(View.INVISIBLE);
+      fade(nav, 5000, false);
     }
   }
 
@@ -483,11 +483,26 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   }
 
   /**
-   * Animate view 
+   * Animate Fade in or Fade out view
    * @param v view will animate
    * @param fadeIn true if become visible, false become invisible
    */
   private void fade(final View v, boolean fadeIn) {
+    if (fadeIn) {
+      fade(v, 200, true);
+
+    } else {
+      fade(v, 800, false);
+    }
+  }
+
+  /**
+   * Animate Fade in or Fade out view
+   * @param v view will animate
+   * @param duration duration of animate
+   * @param fadeIn true if become visible, false become invisible
+   */
+  private void fade(final View v, long duration, boolean fadeIn) {
 
     if (fadeIn && v.getVisibility() != View.VISIBLE) {
       v.setAlpha(0f);
@@ -495,13 +510,12 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
 
       v.animate()
           .alpha(1f)
-          .setDuration(200)
+          .setDuration(duration)
           .setListener(null);
-
-    } else if (!fadeIn && v.getVisibility() == View.VISIBLE) {
+    } else if (!fadeIn) {
       v.animate()
           .alpha(0f)
-          .setDuration(800)
+          .setDuration(duration)
           .setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
