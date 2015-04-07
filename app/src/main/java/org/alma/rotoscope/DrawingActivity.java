@@ -21,6 +21,7 @@ import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 import org.alma.rotoscope.colorpicker.ColorPickerDialog;
 import org.jcodec.api.SequenceEncoder;
 import org.jcodec.common.model.ColorSpace;
@@ -306,6 +307,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     if (showBackground) {
       drawingArea.setBackground(new BitmapDrawable(getResources(), currentFrame));
     }
+
+    ((TextView)findViewById(R.id.numFrameLabel)).setText(currentPicture + 1 + "/" + layers.size());
 
     findViewById(R.id.PreviousButton).setVisibility((currentPicture != 0) ? View.VISIBLE : View.INVISIBLE);
     findViewById(R.id.NextButton).setVisibility((currentPicture < layers.size() - 1) ? View.VISIBLE : View.INVISIBLE);

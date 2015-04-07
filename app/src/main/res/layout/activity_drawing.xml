@@ -24,6 +24,11 @@
             android:src="@drawable/ic_action_next_item" android:contentDescription="@string/button_nextButton"
                  android:layout_marginTop="0dp" android:layout_alignParentRight="true" android:clickable="true"
                android:scaleType="fitXY"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/numFrameLabel" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
   </RelativeLayout>
   <LinearLayout
       android:orientation="vertical"
