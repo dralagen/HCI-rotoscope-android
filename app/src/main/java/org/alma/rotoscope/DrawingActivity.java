@@ -198,20 +198,42 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    */
   private void setLayer() {
 
-    DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
-
-    // calculate the good time for a specific frame correspond currentPicture into video
-    long time = (long) (rateFps * (currentPicture * 1000000 / inputFps));
+    final ProgressDialog loadVideoProgress = new ProgressDialog(this);
+    loadVideoProgress.setMessage("Load new Frame");
+    loadVideoProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+    loadVideoProgress.setIndeterminate(true);
+    loadVideoProgress.setCancelable(false);
 
     Log.v(TAG, "show picture " + currentPicture);
-    Log.v(TAG, "show Frame at " + time);
 
-    currentFrame = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
-    drawingArea.setLayer(layers.get(currentPicture));
-    drawingArea.setBackground(new BitmapDrawable(getResources(), currentFrame));
+    // Load new frame
+    loadVideoProgress.show();
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // calculate the good time for a specific frame correspond currentPicture into video
+          long time = (long) (rateFps * (currentPicture * 1000000 / inputFps));
 
-    findViewById(R.id.PreviousButton).setVisibility((currentPicture != 0) ? View.VISIBLE : View.INVISIBLE);
-    findViewById(R.id.NextButton).setVisibility((currentPicture < layers.size() - 1) ? View.VISIBLE : View.INVISIBLE);
+          currentFrame = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
+
+          handler.post(new Runnable() {
+            @Override
+            public void run() {
+              DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
+              drawingArea.setLayer(layers.get(currentPicture));
+              drawingArea.setBackground(new BitmapDrawable(getResources(), currentFrame));
+
+              findViewById(R.id.PreviousButton).setVisibility((currentPicture != 0) ? View.VISIBLE : View.INVISIBLE);
+              findViewById(R.id.NextButton).setVisibility((currentPicture < layers.size() - 1) ? View.VISIBLE : View.INVISIBLE);
+            }
+          });
+        } finally {
+          loadVideoProgress.dismiss();
+        }
+      }
+    }).start();
+
   }
 
   /**
@@ -270,9 +292,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    */
   public Thread encodeVideo() {
     final ProgressDialog saveProgress = new ProgressDialog(this);
-    saveProgress.setMessage("Encoding video in progress");
-    saveProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-    saveProgress.setIndeterminate(true);
+    saveProgress.setTitle("Encoding video in progress");
+    saveProgress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
     saveProgress.setMax(layers.size());
     saveProgress.setCancelable(false);
     saveProgress.show();
@@ -302,7 +323,14 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         try {
           SequenceEncoder encoder = new SequenceEncoder(outputVideo);
           for (Bitmap frame : layers) {
-            saveProgress.incrementProgressBy(1);
+
+            handler.post(new Runnable() {
+              @Override
+              public void run() {
+                saveProgress.incrementProgressBy(1);
+              }
+            });
+
             Picture outputFrame = fromBitmap(frame);
             for (int i = 0; i <= rateFps; ++i) {
               encoder.encodeNativeFrame(outputFrame);
