@@ -499,8 +499,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   public void toggleBackground(View view) {
     BitmapDrawable background;
     if (view.getAlpha() != 1.0)  {
+      Point size = new Point();
+      getWindowManager().getDefaultDisplay().getSize(size);
+
       background = new BitmapDrawable(getResources(),
-          Bitmap.createBitmap(currentFrame.getWidth(), currentFrame.getHeight(), Bitmap.Config.RGB_565)
+          Bitmap.createBitmap(size.x, size.y, Bitmap.Config.RGB_565)
       );
       view.setAlpha(1.0f);
     } else {
