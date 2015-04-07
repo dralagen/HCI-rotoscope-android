@@ -2,8 +2,6 @@ package org.alma.rotoscope;
 
 import android.content.Context;
 import android.graphics.*;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -88,23 +86,16 @@ public class DrawingArea extends View {
   }
 
   /**
-   * Set new layer and draw on bitmap and set background
+   * Set new layer and draw on bitmap
    *
    * @param bitmap contain the final layer result
-   * @param background the background
    */
-  public void setLayer(Bitmap bitmap, BitmapDrawable background) {
+  public void setLayer(Bitmap bitmap) {
     this.bitmap = bitmap;
-    setBackground(background);
-  }
-
-  @Override
-  public void setBackground(Drawable background) {
-    super.setBackground(background);
-
     if (bitmap != null) {
       canvas = new Canvas(bitmap);
     }
+    invalidate();
   }
 
   @Override

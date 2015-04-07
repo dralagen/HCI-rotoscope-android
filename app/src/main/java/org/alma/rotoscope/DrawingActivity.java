@@ -207,7 +207,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     Log.v(TAG, "show Frame at " + time);
 
     currentFrame = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
-    drawingArea.setLayer(layers.get(currentPicture), new BitmapDrawable(getResources(), currentFrame));
+    drawingArea.setLayer(layers.get(currentPicture));
+    drawingArea.setBackground(new BitmapDrawable(getResources(), currentFrame));
 
     findViewById(R.id.PreviousButton).setVisibility((currentPicture != 0) ? View.VISIBLE : View.INVISIBLE);
     findViewById(R.id.NextButton).setVisibility((currentPicture < layers.size() - 1) ? View.VISIBLE : View.INVISIBLE);
@@ -246,8 +247,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   public void erasePicture(View view) {
     Point size = new Point();
     getWindowManager().getDefaultDisplay().getSize(size);
-    layers.set(currentPicture, Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
-    setLayer();
+    Bitmap newLayer = Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888);
+    layers.set(currentPicture, newLayer);
+
+    DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
+    drawingArea.setLayer(newLayer);
   }
 
   /**
