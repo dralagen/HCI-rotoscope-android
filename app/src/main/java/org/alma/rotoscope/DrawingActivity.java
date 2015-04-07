@@ -28,10 +28,7 @@ import org.jcodec.common.model.Picture;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 
 /**
@@ -72,6 +69,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   private Bitmap currentFrame;
 
   /**
+   * Cache of video frame
+   */
+  private final List<Bitmap> cache = Collections.synchronizedList(new ArrayList<Bitmap>());
+
+  /**
    * All layers will drawn
    */
   private List<Bitmap> layers;
@@ -95,6 +97,34 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    * File output of result video
    */
   private File outputVideo;
+
+  /**
+   * Runnable to invalid and create cache of video
+   */
+  private final Runnable invalidCacheRunnable = new Runnable() {
+    @Override
+    public void run() {
+      // index of min cache picture
+      int minCache = currentPicture - 3;
+      // index of max cache picture
+      int maxCache = currentPicture + 5;
+
+      // loop take more large of [minCache,maxCache] to free memory
+      for (int i = Math.max(minCache*2, 0); i <= Math.min(maxCache*2,layers.size()); ++i) {
+        if (minCache <= i  && i <= maxCache) { // cache
+          if (cache.get(i) == null) { // if not exist
+            cache.set(i, getFrameVideo(i));
+            Log.v(TAG, "cache add frame " + i);
+          }
+        }
+        else { // free
+          cache.set(i, null);
+        }
+      }
+    }
+  };
+
+  private Thread invalidCacheThread;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -159,6 +189,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       layers = new ArrayList<>(nbImageOutput);
       for (int i = 0; i < nbImageOutput; ++i) {
         layers.add(Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888));
+        cache.add(null);
       }
 
       setContentView(R.layout.activity_drawing);
@@ -168,6 +199,9 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       drawingArea.setOnTouchListener(this);
       currentPicture = 0;
       setLayer();
+
+      cache.set(currentPicture, currentFrame);
+
 
       // set color picker
       colorPicker = new ColorPickerDialog(this, drawingArea.getColor());
@@ -189,6 +223,10 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       fade(menu, 5000, false);
       final View nav = findViewById(R.id.navigationLayout);
       fade(nav, 5000, false);
+
+      // launch cache
+      invalidCacheThread = new Thread(invalidCacheRunnable);
+      invalidCacheThread.start();
     }
   }
 
@@ -206,34 +244,41 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
 
     Log.v(TAG, "show picture " + currentPicture);
 
-    // Load new frame
-    loadVideoProgress.show();
-    new Thread(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          // calculate the good time for a specific frame correspond currentPicture into video
-          long time = (long) (rateFps * (currentPicture * 1000000 / inputFps));
+    if (cache.get(currentPicture) != null) {
+      currentFrame = cache.get(currentPicture);
+      refreshDrawingArea();
 
-          currentFrame = metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
+    } else {
+      // Load new frame
+      loadVideoProgress.show();
+      new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            currentFrame = getFrameVideo(currentPicture);
 
-          handler.post(new Runnable() {
-            @Override
-            public void run() {
-              DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
-              drawingArea.setLayer(layers.get(currentPicture));
-              drawingArea.setBackground(new BitmapDrawable(getResources(), currentFrame));
-
-              findViewById(R.id.PreviousButton).setVisibility((currentPicture != 0) ? View.VISIBLE : View.INVISIBLE);
-              findViewById(R.id.NextButton).setVisibility((currentPicture < layers.size() - 1) ? View.VISIBLE : View.INVISIBLE);
-            }
-          });
-        } finally {
-          loadVideoProgress.dismiss();
+            handler.post(new Runnable() {
+              @Override
+              public void run() {
+                refreshDrawingArea();
+              }
+            });
+          } finally {
+            loadVideoProgress.dismiss();
+          }
         }
-      }
-    }).start();
+      }).start();
 
+    }
+  }
+
+  private void refreshDrawingArea() {
+    DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
+    drawingArea.setLayer(layers.get(currentPicture));
+    drawingArea.setBackground(new BitmapDrawable(getResources(), currentFrame));
+
+    findViewById(R.id.PreviousButton).setVisibility((currentPicture != 0) ? View.VISIBLE : View.INVISIBLE);
+    findViewById(R.id.NextButton).setVisibility((currentPicture < layers.size() - 1) ? View.VISIBLE : View.INVISIBLE);
   }
 
   /**
@@ -247,6 +292,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
 
     currentPicture++;
     setLayer();
+    invalidCache();
   }
 
   /**
@@ -260,6 +306,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
 
     currentPicture--;
     setLayer();
+    invalidCache();
   }
 
   /**
@@ -556,4 +603,22 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
           });
     }
   }
+
+  private Bitmap getFrameVideo(int at) {
+    // calculate the good time for a specific frame correspond currentPicture into video
+    long time = (long) (rateFps * (at * 1000000 / inputFps));
+    try {
+      return metadata.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  private synchronized void invalidCache() {
+    if (!invalidCacheThread.isAlive()) {
+      invalidCacheThread = new Thread(invalidCacheRunnable);
+      invalidCacheThread.start();
+    }
+  }
+
 }
