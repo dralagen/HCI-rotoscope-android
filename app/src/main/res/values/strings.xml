@@ -19,6 +19,9 @@
     <string name="send_to">Share your video</string>
     <string name="button_toggleBackground">Toggle Background</string>
     <string name="button_play">Play</string>
+    <string name="button_onionSkin">Number of Onion Skin</string>
+    <string name="nbOnionLabel">Number of Onion Skin</string>
+    <string name="freqOnionLabel">Frequency of Onion Skin</string>
 
 
 </resources>

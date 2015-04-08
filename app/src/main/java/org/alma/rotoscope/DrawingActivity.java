@@ -3,12 +3,15 @@ package org.alma.rotoscope;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
@@ -21,6 +24,7 @@ import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import org.alma.rotoscope.colorpicker.ColorPickerDialog;
 import org.jcodec.api.SequenceEncoder;
@@ -78,6 +82,16 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    * All layers will drawn
    */
   private List<Bitmap> layers;
+
+  /**
+   * Number of onion skin
+   */
+  private int nbOnion;
+
+  /**
+   * Frequency of onion skin
+   */
+  private int freqOnion;
 
   /**
    * A color picker dialog to change the paint color
@@ -208,6 +222,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       drawingArea.setOnTouchListener(this);
       currentPicture = 0;
       showBackground = true;
+      nbOnion = 0;
+      freqOnion = 1;
 
       setLayer();
 
@@ -311,7 +327,21 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
     drawingArea.setLayer(layers.get(currentPicture));
     if (showBackground) {
-      drawingArea.setBackground(new BitmapDrawable(getResources(), currentFrame));
+      Bitmap background = Bitmap.createBitmap(currentFrame);
+      Canvas canvasBackground = new Canvas(background);
+      Paint backgroundPaint = new Paint(Paint.DITHER_FLAG);
+      backgroundPaint.setAlpha(100);
+
+      // Draw onion skin on background
+      int firstIndex = Math.max(currentPicture - nbOnion*freqOnion, 0);
+
+      for (int i = currentPicture - freqOnion ; i >= firstIndex; i-=freqOnion) {
+        // opacity between [100,200]
+        backgroundPaint.setAlpha((100/nbOnion*freqOnion)*(i-firstIndex) + 100);
+        canvasBackground.drawBitmap(layers.get(i), 0, 0, backgroundPaint);
+      }
+
+      drawingArea.setBackground(new BitmapDrawable(getResources(), background));
     }
 
     ((TextView)findViewById(R.id.numFrameLabel)).setText(currentPicture + 1 + "/" + layers.size());
@@ -516,6 +546,53 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         startActivity(viewIntent);
       }
     }).start();
+  }
+
+  /**
+   * Open dialog to set nbOnion and set freqOnion
+   *
+   * @param view android view
+   */
+  public void onionSkinSettings(View view) {
+    final AlertDialog.Builder onionDialogBuilder = new AlertDialog.Builder(this);
+
+    View onionDialogView = getLayoutInflater().inflate(R.layout.dialog_onion_settings, null);
+    onionDialogBuilder.setView(onionDialogView);
+
+    ((EditText) onionDialogView.findViewById(R.id.nbOnionInput)).setText(String.valueOf(nbOnion));
+
+    ((EditText) onionDialogView.findViewById(R.id.freqOnionInput)).setText(String.valueOf(freqOnion));
+
+    onionDialogBuilder
+        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            AlertDialog d = (AlertDialog) dialog;
+            try {
+              nbOnion = Math.max(Integer.parseInt(((EditText) d.findViewById(R.id.nbOnionInput)).getText().toString()), 0);
+            } catch (NumberFormatException e) {
+              nbOnion = 0;
+            }
+
+            try {
+              freqOnion = Math.max(Integer.parseInt(((EditText) d.findViewById(R.id.freqOnionInput)).getText().toString()), 1);
+            } catch (NumberFormatException e) {
+              freqOnion = 1;
+            }
+
+            setLayer();
+          }
+        })
+        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            dialog.dismiss();
+          }
+        });
+
+    onionDialogBuilder.setTitle("Onion Skin Settings");
+
+    onionDialogBuilder.create().show();
   }
 
   /**
