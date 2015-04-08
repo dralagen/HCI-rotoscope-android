@@ -113,27 +113,31 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    */
   private File outputVideo;
 
+  private boolean cacheUpToDate;
   /**
    * Runnable to invalid and create cache of video
    */
   private final Runnable invalidCacheRunnable = new Runnable() {
     @Override
     public void run() {
-      // index of min cache picture
-      int minCache = currentPicture - 3;
-      // index of max cache picture
-      int maxCache = currentPicture + 5;
+      while (!cacheUpToDate) {
+        cacheUpToDate = true;
 
-      // loop take more large of [minCache,maxCache] to free memory
-      for (int i = Math.max(minCache-3, 0); i < Math.min(maxCache+5,layers.size()); ++i) {
-        if (minCache <= i  && i <= maxCache) { // cache
-          if (cache.get(i) == null) { // if not exist
-            cache.set(i, getFrameVideo(i));
-            Log.v(TAG, "cache add frame " + i);
+        // index of min cache picture
+        int minCache = currentPicture - 3;
+        // index of max cache picture
+        int maxCache = currentPicture + 5;
+
+        // loop take more large of [minCache,maxCache] to free memory
+        for (int i = Math.max(minCache - 3, 0); i < Math.min(maxCache + 5, layers.size()); ++i) {
+          if (minCache <= i && i <= maxCache) { // cache
+            if (cache.get(i) == null) { // if not exist
+              cache.set(i, getFrameVideo(i));
+              Log.v(TAG, "cache add frame " + i);
+            }
+          } else { // free
+            cache.set(i, null);
           }
-        }
-        else { // free
-          cache.set(i, null);
         }
       }
       Log.v(TAG, "Caculate cache terminate");
@@ -247,33 +251,6 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     }
   }
 
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-
-    if (invalidCacheThread.isAlive()) {
-      invalidCacheThread.interrupt();
-      try {
-        invalidCacheThread.join();
-      } catch (InterruptedException ignore) {}
-    }
-
-    for (int i = 0; i < cache.size(); i++) {
-      cache.set(i, null);
-      layers.set(i, null);
-    }
-
-    layers = null;
-
-    currentFrame = null;
-    currentPicture = 0;
-
-    metadata.release();
-
-    System.gc();
-
-  }
-
   /**
    * Select the currentPicture into layers and the good frame form the input video,
    * and pass all at the DrawingArea and use them to drawing into current picture and show good frame.
@@ -299,23 +276,15 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         @Override
         public void run() {
           try {
-            if (invalidCacheThread.isAlive()) {
-              invalidCacheThread.interrupt();
-            }
-
             currentFrame = getFrameVideo(currentPicture);
 
             handler.post(new Runnable() {
               @Override
               public void run() {
                 refreshDrawingArea();
-                try {
-                  invalidCacheThread.join();
-                } catch (InterruptedException e) {
-                  e.printStackTrace();
+                synchronized (cache) {
+                  cache.set(currentPicture, currentFrame);
                 }
-                cache.set(currentPicture, currentFrame);
-                invalidCache();
               }
             });
           } finally {
@@ -784,6 +753,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    */
   private synchronized void invalidCache() {
     Log.v(TAG, "invalid cache");
+    cacheUpToDate = false;
+
     if (!invalidCacheThread.isAlive()) {
       invalidCacheThread = new Thread(invalidCacheRunnable);
       invalidCacheThread.start();
