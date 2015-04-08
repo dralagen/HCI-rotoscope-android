@@ -291,11 +291,6 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
               @Override
               public void run() {
                 invalidCacheThread.interrupt();
-                try {
-                  invalidCacheThread.join();
-                } catch (InterruptedException e) {
-                  e.printStackTrace();
-                }
 
                 refreshDrawingArea();
                 invalidCache();
