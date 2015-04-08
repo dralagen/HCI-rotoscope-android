@@ -125,7 +125,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       int maxCache = currentPicture + 5;
 
       // loop take more large of [minCache,maxCache] to free memory
-      for (int i = Math.max(minCache*2, 0); i < Math.min(maxCache*2,layers.size()); ++i) {
+      for (int i = Math.max(minCache-3, 0); i < Math.min(maxCache+5,layers.size()); ++i) {
         if (minCache <= i  && i <= maxCache) { // cache
           if (cache.get(i) == null) { // if not exist
             cache.set(i, getFrameVideo(i));
@@ -136,6 +136,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
           cache.set(i, null);
         }
       }
+      Log.v(TAG, "Caculate cache terminate");
     }
   };
 
@@ -215,6 +216,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         cache.add(null);
       }
 
+      invalidCacheThread = new Thread();
+
       setContentView(R.layout.activity_drawing);
 
       // setup drawingArea
@@ -226,9 +229,6 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       freqOnion = 1;
 
       setLayer();
-
-      cache.set(currentPicture, currentFrame);
-
 
       // set color picker
       colorPicker = new ColorPickerDialog(this, drawingArea.getColor());
@@ -244,10 +244,6 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         public void onClick(DialogInterface dialog, int which) {
         }
       });
-
-      // launch cache
-      invalidCacheThread = new Thread(invalidCacheRunnable);
-      invalidCacheThread.start();
     }
   }
 
@@ -255,10 +251,12 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   protected void onDestroy() {
     super.onDestroy();
 
-    invalidCacheThread.interrupt();
-    try {
-      invalidCacheThread.join();
-    } catch (InterruptedException ignore) {}
+    if (invalidCacheThread.isAlive()) {
+      invalidCacheThread.interrupt();
+      try {
+        invalidCacheThread.join();
+      } catch (InterruptedException ignore) {}
+    }
 
     for (int i = 0; i < cache.size(); i++) {
       cache.set(i, null);
@@ -301,12 +299,23 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         @Override
         public void run() {
           try {
+            if (invalidCacheThread.isAlive()) {
+              invalidCacheThread.interrupt();
+            }
+
             currentFrame = getFrameVideo(currentPicture);
 
             handler.post(new Runnable() {
               @Override
               public void run() {
                 refreshDrawingArea();
+                try {
+                  invalidCacheThread.join();
+                } catch (InterruptedException e) {
+                  e.printStackTrace();
+                }
+                cache.set(currentPicture, currentFrame);
+                invalidCache();
               }
             });
           } finally {
@@ -360,8 +369,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     }
 
     currentPicture++;
-    setLayer();
     invalidCache();
+    setLayer();
   }
 
   /**
@@ -374,8 +383,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     }
 
     currentPicture--;
-    setLayer();
     invalidCache();
+    setLayer();
   }
 
   /**
@@ -774,6 +783,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    * Invalid cache to run invalidCacheRunnable if no thread is already run
    */
   private synchronized void invalidCache() {
+    Log.v(TAG, "invalid cache");
     if (!invalidCacheThread.isAlive()) {
       invalidCacheThread = new Thread(invalidCacheRunnable);
       invalidCacheThread.start();
