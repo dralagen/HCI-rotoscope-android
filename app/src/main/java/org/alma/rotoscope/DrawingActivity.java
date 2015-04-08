@@ -123,24 +123,33 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
       while (!cacheUpToDate) {
         cacheUpToDate = true;
 
-        // index of min cache picture
-        int minCache = currentPicture - 3;
-        // index of max cache picture
-        int maxCache = currentPicture + 5;
+        // size of picture before and after currentPicture
+        int cacheSize = 4;
 
-        // loop take more large of [minCache,maxCache] to free memory
-        for (int i = Math.max(minCache - 3, 0); i < Math.min(maxCache + 5, layers.size()); ++i) {
-          if (minCache <= i && i <= maxCache) { // cache
-            if (cache.get(i) == null) { // if not exist
-              cache.set(i, getFrameVideo(i));
-              Log.v(TAG, "cache add frame " + i);
+        if (cache.get(currentPicture) == null) {
+          cache.set(currentPicture, getFrameVideo(currentPicture));
+        }
+
+        // calculate cache
+        for (int i = 1; i <= cacheSize; ++i) {
+          for (int index: new int[]{currentPicture + i, currentPicture - i}) {
+            if (0 <= index && index < cache.size()) {
+              if (cache.get(index) == null) {
+                cache.set(index, getFrameVideo(index));
+                Log.v(TAG, "cache add frame " + index);
+              }
             }
-          } else { // free
+          }
+        }
+
+        // free old cache
+        for (int i = 0; i < cache.size(); ++i) {
+          if (i < currentPicture-cacheSize || i > currentPicture+cacheSize) {
             cache.set(i, null);
           }
         }
       }
-      Log.v(TAG, "Caculate cache terminate");
+      Log.v(TAG, "Calculate cache terminate");
     }
   };
 
@@ -281,10 +290,15 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
             handler.post(new Runnable() {
               @Override
               public void run() {
-                refreshDrawingArea();
-                synchronized (cache) {
-                  cache.set(currentPicture, currentFrame);
+                invalidCacheThread.interrupt();
+                try {
+                  invalidCacheThread.join();
+                } catch (InterruptedException e) {
+                  e.printStackTrace();
                 }
+
+                refreshDrawingArea();
+                invalidCache();
               }
             });
           } finally {
@@ -304,8 +318,9 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   private void refreshDrawingArea() {
     DrawingArea drawingArea = (DrawingArea) findViewById(R.id.drawingAreaView);
     drawingArea.setLayer(layers.get(currentPicture));
+    Bitmap background;
     if (showBackground) {
-      Bitmap background = Bitmap.createBitmap(currentFrame);
+      background = Bitmap.createBitmap(currentFrame);
       Canvas canvasBackground = new Canvas(background);
       Paint backgroundPaint = new Paint(Paint.DITHER_FLAG);
       backgroundPaint.setAlpha(100);
@@ -319,8 +334,14 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         canvasBackground.drawBitmap(layers.get(i), 0, 0, backgroundPaint);
       }
 
-      drawingArea.setBackground(new BitmapDrawable(getResources(), background));
+    } else {
+      Point size = new Point();
+      getWindowManager().getDefaultDisplay().getSize(size);
+
+      background = Bitmap.createBitmap(size.x, size.y, Bitmap.Config.RGB_565);
     }
+
+    drawingArea.setBackground(new BitmapDrawable(getResources(), background));
 
     ((TextView)findViewById(R.id.numFrameLabel)).setText(currentPicture + 1 + "/" + layers.size());
 
@@ -612,23 +633,14 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    * @param view android view
    */
   public void toggleBackground(View view) {
-    BitmapDrawable background;
     showBackground = !showBackground;
 
     if (showBackground) {
-      background = new BitmapDrawable(getResources(), currentFrame);
       view.setAlpha(0.5f);
     } else {
-      Point size = new Point();
-      getWindowManager().getDefaultDisplay().getSize(size);
-
-      background = new BitmapDrawable(getResources(),
-          Bitmap.createBitmap(size.x, size.y, Bitmap.Config.RGB_565)
-      );
       view.setAlpha(1.0f);
     }
-
-    findViewById(R.id.drawingAreaView).setBackground(background);
+    refreshDrawingArea();
   }
 
   @Override
