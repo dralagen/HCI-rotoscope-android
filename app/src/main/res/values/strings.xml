@@ -22,6 +22,9 @@
     <string name="button_onionSkin">Number of Onion Skin</string>
     <string name="nbOnionLabel">Number of Onion Skin</string>
     <string name="freqOnionLabel">Frequency of Onion Skin</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
+    <string name="title_dialogOnionSkin">Onion Skin Settings</string>
 
 
 </resources>

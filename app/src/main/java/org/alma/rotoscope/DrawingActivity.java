@@ -590,7 +590,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
           }
         });
 
-    onionDialogBuilder.setTitle("Onion Skin Settings");
+    onionDialogBuilder.setTitle(R.string.title_dialogOnionSkin);
 
     onionDialogBuilder.create().show();
   }
