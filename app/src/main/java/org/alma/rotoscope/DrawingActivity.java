@@ -280,7 +280,13 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
 
     } else {
       // Load new frame
-      loadVideoProgress.show();
+      handler.post(new Runnable() {
+        @Override
+        public void run () {
+          loadVideoProgress.show();
+        }
+      });
+
       new Thread(new Runnable() {
         @Override
         public void run() {
@@ -297,7 +303,12 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
               }
             });
           } finally {
-            loadVideoProgress.dismiss();
+            handler.post(new Runnable() {
+              @Override
+              public void run () {
+                loadVideoProgress.dismiss();
+              }
+            });
           }
         }
       }).start();
