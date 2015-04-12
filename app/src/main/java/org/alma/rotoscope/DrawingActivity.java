@@ -357,24 +357,24 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     Bitmap background;
     if (showBackground) {
       background = Bitmap.createBitmap(currentFrame);
-      Canvas canvasBackground = new Canvas(background);
-      Paint backgroundPaint = new Paint(Paint.DITHER_FLAG);
-      backgroundPaint.setAlpha(100);
-
-      // Draw onion skin on background
-      int firstIndex = Math.max(currentPicture - nbOnion*freqOnion, 0);
-
-      for (int i = currentPicture - freqOnion ; i >= firstIndex; i-=freqOnion) {
-        // opacity between [100,200]
-        backgroundPaint.setAlpha((100/nbOnion*freqOnion)*(i-firstIndex) + 100);
-        canvasBackground.drawBitmap(layers.get(i), 0, 0, backgroundPaint);
-      }
-
     } else {
       Point size = new Point();
       getWindowManager().getDefaultDisplay().getSize(size);
 
       background = Bitmap.createBitmap(size.x, size.y, Bitmap.Config.RGB_565);
+    }
+
+    Canvas canvasBackground = new Canvas(background);
+    Paint backgroundPaint = new Paint(Paint.DITHER_FLAG);
+    backgroundPaint.setAlpha(100);
+
+    // Draw onion skin on background
+    int firstIndex = Math.max(currentPicture - nbOnion*freqOnion, 0);
+
+    for (int i = currentPicture - freqOnion ; i >= firstIndex; i-=freqOnion) {
+      // opacity between [100,200]
+      backgroundPaint.setAlpha((100/nbOnion*freqOnion)*(i-firstIndex) + 100);
+      canvasBackground.drawBitmap(layers.get(i), 0, 0, backgroundPaint);
     }
 
     drawingArea.setBackground(new BitmapDrawable(getResources(), background));
