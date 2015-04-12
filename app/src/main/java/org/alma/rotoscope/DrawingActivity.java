@@ -47,6 +47,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   private static final String TAG = "DrawingActivity";
 
   private static final Handler handler = new Handler();
+  private static final float TOUCH_TOLERANCE = 4;
 
   /**
    * fps of original video
@@ -107,6 +108,14 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
    * true if you don't have MotionEvent.ACTION_MOVE
    */
   private boolean shortPress;
+  /**
+   * start position X of finger when start touch
+   */
+  private float touchX;
+  /**
+   * start position X of finger when start touch
+   */
+  private float touchY;
 
   /**
    * File output of result video
@@ -257,7 +266,28 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
         public void onClick(DialogInterface dialog, int which) {
         }
       });
+
+      showMenu();
     }
+  }
+
+  private void showMenu () {
+    final View menu = findViewById(R.id.MenuLayout);
+    fade(menu, true);
+
+    final View nav = findViewById(R.id.navigationLayout);
+    fade(nav, true);
+
+    Log.v(TAG, "Menu visible");
+
+    runHideMenu = new Runnable() {
+      @Override
+      public void run() {
+        fade(menu, false);
+        fade(nav, false);
+        Log.v(TAG, "Menu invisible");
+      }
+    };
   }
 
   /**
@@ -653,11 +683,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
   public boolean onTouch(View v, MotionEvent event) {
     switch (event.getAction()) {
       case  MotionEvent.ACTION_DOWN:
-        onTouchDown();
+        onTouchDown(event.getX(), event.getY());
         break;
 
       case MotionEvent.ACTION_MOVE:
-        onTouchMove();
+        onTouchMove(event.getX(), event.getY());
         break;
 
       case MotionEvent.ACTION_UP:
@@ -666,36 +696,26 @@ public class DrawingActivity extends Activity implements View.OnTouchListener {
     return false;
   }
 
-  private void onTouchDown() {
+  private void onTouchDown (float x, float y) {
     shortPress = true;
+    touchX = x;
+    touchY = y;
   }
 
-  private void onTouchMove() {
-    shortPress = false;
-    handler.removeCallbacks(runHideMenu);
-    handler.post(runHideMenu);
-    runHideMenu = null;
+  private void onTouchMove (float x, float y) {
+    float dx = Math.abs(x - touchX);
+    float dy = Math.abs(y - touchY);
+    if (shortPress && (dx > TOUCH_TOLERANCE || dy > TOUCH_TOLERANCE)) {
+      shortPress = false;
+      handler.removeCallbacks(runHideMenu);
+      handler.post(runHideMenu);
+      runHideMenu = null;
+    }
   }
 
   private void onTouchUp() {
     if (shortPress) {
-
-      final View menu = findViewById(R.id.MenuLayout);
-      fade(menu, true);
-
-      final View nav = findViewById(R.id.navigationLayout);
-      fade(nav, true);
-
-      Log.v(TAG, "Menu visible");
-
-      runHideMenu = new Runnable() {
-        @Override
-        public void run() {
-          fade(menu, false);
-          fade(nav, false);
-          Log.v(TAG, "Menu invisible");
-        }
-      };
+      showMenu();
     }
   }
 
